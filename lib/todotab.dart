@@ -10,6 +10,8 @@ class TodoTab extends StatefulWidget {
 
 class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   List<Todo> todos = [];
+  List<Todo> checkedTodos = [];
+
   bool checked;
   TextDecoration cutText;
   Color color;
@@ -25,7 +27,13 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
 
   void fetchTodo() async {
     List<Todo> fetchedTodos = await getTodos();
-    todos = fetchedTodos;
+    for (Todo todo in fetchedTodos) {
+      if (todo.isChecked == true) {
+        checkedTodos.add(todo);
+      } else {
+        todos.add(todo);
+      }
+    }
     setState(() {});
   }
 
@@ -42,7 +50,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           if (result[0] != '') {
             Todo todo = Todo(title: result[0], isChecked: false);
             todo.id = saveTodo(todo);
-            todos.add(todo);
+            todos.insert(0, todo);
           }
           setState(() {});
         },
@@ -53,7 +61,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           size: 30,
         ),
       ),
-      body: todos.isEmpty
+      body: todos.isEmpty && checkedTodos.isEmpty
           ? Center(
               child: Text(
                 "Add a todo",
@@ -61,20 +69,41 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
               ),
             )
           : Container(
+              // color: Colors.white,
               margin: EdgeInsets.all(8),
-              child: ListView.builder(
-                itemCount: todos.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    _drawTodo(todos[index], index),
+              child: Column(
+                children: [
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: todos.length,
+                      itemBuilder: (BuildContext context, int index) =>
+                          drawTodo(todos[index], index),
+                    ),
+                  ),
+                  Container(
+                    height: 1.0,
+                    color:
+                        checkedTodos.isEmpty ? Colors.transparent : Colors.grey,
+                  ),
+                  Flexible(
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: checkedTodos.length,
+                        itemBuilder: (BuildContext context, int index) =>
+                            drawTodo(checkedTodos[index], index)),
+                  )
+                ],
               ),
             ),
     );
   }
 
-  Widget _drawTodo(Todo todo, int index) {
+  Widget drawTodo(Todo todo, int index) {
     checked = todo.isChecked;
-    cutText = checked ? TextDecoration.lineThrough : TextDecoration.none;
-    color = checked ? Colors.grey : Colors.white;
+    Color color = checked ? Colors.grey : Colors.white;
+    TextDecoration cutText =
+        checked ? TextDecoration.lineThrough : TextDecoration.none;
     return Container(
       margin: EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
       child: Row(
@@ -85,8 +114,16 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
               onChanged: (bool check) {
                 setState(() {
                   checked = check;
-                  todos[index].isChecked = check;
+                  todo.isChecked = check;
                   updateTodo(todo);
+                  if (checked == true) {
+                    todos.removeAt(index);
+                    checkedTodos.insert(0, todo);
+                  }
+                  if (checked == false) {
+                    todos.add(todo);
+                    checkedTodos.removeAt(index);
+                  }
                 });
               }),
           Expanded(
@@ -98,14 +135,21 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                     todo.title,
                     overflow: TextOverflow.fade,
                     style: TextStyle(
-                        decoration: cutText, fontSize: 20, color: color),
+                      fontSize: 20,
+                      color: color,
+                      decoration: cutText,
+                    ),
                   ),
                 ),
                 IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
                       await deleteTodo(todo);
-                      todos.removeAt(index);
+                      if (todo.isChecked == true) {
+                        checkedTodos.removeAt(index);
+                      } else {
+                        todos.removeAt(index);
+                      }
                       setState(() {});
                     })
               ],
