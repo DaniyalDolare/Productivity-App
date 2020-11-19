@@ -25,15 +25,13 @@ Future<List<Note>> getNotes() async {
   if (dataSnapshot.value != null) {
     Map<dynamic, dynamic> values = dataSnapshot.value;
     values.forEach((key, value) {
-      print(key);
       Note note =
           Note(title: value['title'], note: value['note'], time: value['time']);
       note.setId(key.toString());
       notes.add(note);
-      print(value['title']);
     });
   } else {
-    print('null');
+    print('No data');
   }
   return notes;
 }
