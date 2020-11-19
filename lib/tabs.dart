@@ -1,3 +1,4 @@
+import 'package:example/add_data.dart';
 import 'package:example/login.dart';
 import 'package:example/settings.dart';
 import 'package:example/todotab.dart';
@@ -55,6 +56,7 @@ class Tabs extends StatefulWidget {
 }
 
 class _TabsState extends State<Tabs> {
+  User user = FirebaseAuth.instance.currentUser;
   @override
   void initState() {
     super.initState();
@@ -68,7 +70,7 @@ class _TabsState extends State<Tabs> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          //automaticallyImplyLeading: false,
           backgroundColor: Colors.black12,
           title: Text("Productivity"),
           actions: [
@@ -110,9 +112,43 @@ class _TabsState extends State<Tabs> {
             ],
           ),
         ),
+        drawer: SafeArea(
+          child: Drawer(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(icon: Icon(Icons.logout), onPressed: null)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(this.user.photoURL.toString()),
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(10)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  user.displayName,
+                  style: TextStyle(fontSize: 25),
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(5)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  user.email,
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          )),
+        ),
         backgroundColor: Colors.grey[900],
         body: TabBarView(
-          children: [NotesTab(), TodoTab(), Text("Add data")],
+          children: [NotesTab(), TodoTab(), AppUsages()],
         ),
       ),
     );
