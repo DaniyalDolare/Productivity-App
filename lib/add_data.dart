@@ -27,6 +27,12 @@ class _AppUsagesState extends State<AppUsages> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    startdate.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -48,7 +54,9 @@ class _AppUsagesState extends State<AppUsages> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: getUsageStats, child: Icon(Icons.file_download)),
+          heroTag: null,
+          onPressed: getUsageStats,
+          child: Icon(Icons.file_download)),
     );
   }
 }
