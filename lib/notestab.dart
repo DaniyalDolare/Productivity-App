@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -16,20 +17,20 @@ class _NotesTabState extends State<NotesTab>
   @override
   bool get wantKeepAlive => true;
 
-  void initState() {
-    super.initState();
-    fetchNotes();
-    //FirebaseDatabase.instance.goOnline();
-  }
+  // void initState() {
+  //   super.initState();
+  //   fetchNotes();
+  //   // FirebaseDatabase.instance.goOnline();
+  // }
 
-  void fetchNotes() async {
-    List<Note> fetchedNotes = await getNotes();
-    fetchedNotes.sort((a, b) {
-      return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
-    });
-    this.notes = fetchedNotes;
-    setState(() {});
-  }
+  // Future<List<Note>> fetchNotes() async {
+  //   List<Note> fetchedNotes = await getNotes();
+  //   fetchedNotes.sort((a, b) {
+  //     return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
+  //   });
+  //   this.notes = fetchedNotes;
+  //   return fetchedNotes;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -61,24 +62,39 @@ class _NotesTabState extends State<NotesTab>
           size: 30,
         ),
       ),
-      body: notes.isEmpty
-          ? Center(
-              child: Text(
-                "Add a note",
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : Container(
-              margin: EdgeInsets.all(8),
-              child: StaggeredGridView.countBuilder(
-                crossAxisCount: 2,
-                itemCount: notes.length,
-                itemBuilder: (context, index) => _drawNoteCard(notes[index]),
-                staggeredTileBuilder: (index) => StaggeredTile.fit(1),
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-              ),
-            ),
+      body: FutureBuilder<List<Note>>(
+        future: getNotes(),
+        builder: (BuildContext context, AsyncSnapshot<List<Note>> snapshot) {
+          if (snapshot.hasData) {
+            List<Note> fetchedNotes = snapshot.data;
+            fetchedNotes.sort((a, b) {
+              return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
+            });
+            this.notes = fetchedNotes;
+            return this.notes.isEmpty
+                ? Center(
+                    child: Text(
+                      "Add a note",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : Container(
+                    margin: EdgeInsets.all(8),
+                    child: StaggeredGridView.countBuilder(
+                      crossAxisCount: 2,
+                      itemCount: notes.length,
+                      itemBuilder: (context, index) =>
+                          _drawNoteCard(notes[index]),
+                      staggeredTileBuilder: (index) => StaggeredTile.fit(1),
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                    ),
+                  );
+          } else {
+            return CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 
@@ -109,7 +125,7 @@ class _NotesTabState extends State<NotesTab>
             setState(() {});
           },
           child: Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               //shape: BoxShape.rectangle,
               border: Border.all(width: 1, color: Colors.grey),
@@ -123,9 +139,11 @@ class _NotesTabState extends State<NotesTab>
                   note.title,
                   textScaleFactor: 1.5,
                 ),
+                Padding(padding: EdgeInsets.all(4.0)),
                 Text(
                   note.note,
-                  maxLines: 15,
+                  style: TextStyle(color: Colors.grey[300]),
+                  maxLines: 12,
                 ),
               ],
             ),
@@ -195,33 +213,37 @@ class _AddNoteState extends State<AddNote> {
           iconTheme: IconThemeData(color: Colors.grey),
         ),
         backgroundColor: Colors.grey[900],
-        body: Column(
-          children: [
-            TextField(
-              controller: titleController,
-              cursorColor: Colors.red[200],
-              style: TextStyle(fontSize: 25),
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: "Title",
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.only(left: 10),
-              ),
-            ),
-            Expanded(
-              child: TextField(
-                controller: noteController,
+        body: Container(
+          padding: EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: titleController,
                 cursorColor: Colors.red[200],
+                style: TextStyle(fontSize: 25),
                 textCapitalization: TextCapitalization.sentences,
-                maxLines: null,
                 decoration: InputDecoration(
-                  hintText: "Note",
+                  hintText: "Title",
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.only(left: 10),
                 ),
               ),
-            ),
-          ],
+              Padding(padding: EdgeInsets.all(4.0)),
+              Expanded(
+                child: TextField(
+                  controller: noteController,
+                  cursorColor: Colors.red[200],
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText: "Note",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(left: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
