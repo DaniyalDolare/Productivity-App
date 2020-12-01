@@ -1,11 +1,13 @@
 import 'package:example/add_data.dart';
 import 'package:example/login.dart';
+import 'package:example/password_manager.dart';
 import 'package:example/settings.dart';
 import 'package:example/todotab.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'auth.dart';
 import 'notestab.dart';
 
 class Home extends StatefulWidget {
@@ -42,8 +44,7 @@ class _HomeState extends State<Home> {
               /// is because there is user already logged
               return Tabs();
             }
-
-            /// other way there is no user logged.
+            // other way there is no user logged.
             return LoginPage();
           }),
     );
@@ -115,34 +116,61 @@ class _TabsState extends State<Tabs> {
         drawer: SafeArea(
           child: Drawer(
               child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(icon: Icon(Icons.logout), onPressed: null)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundImage: NetworkImage(this.user.photoURL.toString()),
+              Container(
+                color: Colors.red[400],
+                padding: EdgeInsets.only(left: 10.0, bottom: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          icon: Icon(Icons.logout),
+                          onPressed: () {
+                            signOutGoogle();
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()),
+                                (route) => false);
+                          },
+                        )),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage:
+                              NetworkImage(this.user.photoURL.toString()),
+                        ),
+                        Padding(padding: EdgeInsets.all(10)),
+                        Text(
+                          user.displayName,
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        Padding(padding: EdgeInsets.all(5)),
+                        Text(
+                          user.email,
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              Padding(padding: EdgeInsets.all(10)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  user.displayName,
-                  style: TextStyle(fontSize: 25),
-                ),
-              ),
-              Padding(padding: EdgeInsets.all(5)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  user.email,
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
+              ListTile(
+                leading: Icon(Icons.security),
+                title: Text("Password Manager"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PasswordManager()));
+                },
+              )
             ],
           )),
         ),
