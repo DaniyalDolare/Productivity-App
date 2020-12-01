@@ -34,6 +34,9 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
         todos.add(todo);
       }
     }
+    for (Todo todo in checkedTodos) {
+      todos.add(todo);
+    }
     setState(() {});
   }
 
@@ -61,40 +64,17 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           size: 30,
         ),
       ),
-      body: todos.isEmpty && checkedTodos.isEmpty
+      body: this.todos.isEmpty
           ? Center(
               child: Text(
                 "Add a todo",
                 style: TextStyle(color: Colors.grey),
               ),
             )
-          : Container(
-              // color: Colors.white,
-              margin: EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: todos.length,
-                      itemBuilder: (BuildContext context, int index) =>
-                          drawTodo(todos[index], index),
-                    ),
-                  ),
-                  Container(
-                    height: 1.0,
-                    color:
-                        checkedTodos.isEmpty ? Colors.transparent : Colors.grey,
-                  ),
-                  Flexible(
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: checkedTodos.length,
-                        itemBuilder: (BuildContext context, int index) =>
-                            drawTodo(checkedTodos[index], index)),
-                  )
-                ],
-              ),
+          : ListView.builder(
+              itemCount: todos.length,
+              itemBuilder: (BuildContext context, int index) =>
+                  drawTodo(todos[index], index),
             ),
     );
   }
@@ -118,11 +98,13 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                   updateTodo(todo);
                   if (checked == true) {
                     todos.removeAt(index);
-                    checkedTodos.insert(0, todo);
+                    todos.insert(todos.length - checkedTodos.length, todo);
+                    checkedTodos.add(todo);
                   }
                   if (checked == false) {
-                    todos.add(todo);
-                    checkedTodos.removeAt(index);
+                    todos.removeAt(index);
+                    todos.insert(0, todo);
+                    checkedTodos.remove(todo);
                   }
                 });
               }),
@@ -135,7 +117,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                     todo.title,
                     overflow: TextOverflow.fade,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       color: color,
                       decoration: cutText,
                     ),
@@ -146,10 +128,9 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                     onPressed: () async {
                       await deleteTodo(todo);
                       if (todo.isChecked == true) {
-                        checkedTodos.removeAt(index);
-                      } else {
-                        todos.removeAt(index);
+                        checkedTodos.remove(todo);
                       }
+                      todos.removeAt(index);
                       setState(() {});
                     })
               ],
