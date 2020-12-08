@@ -26,7 +26,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   }
 
   void fetchTodo() async {
-    List<Todo> fetchedTodos = await getTodos();
+    List<Todo> fetchedTodos = await getTodosFromFirestore();
     for (Todo todo in fetchedTodos) {
       if (todo.isChecked == true) {
         checkedTodos.add(todo);
@@ -37,6 +37,9 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
     for (Todo todo in checkedTodos) {
       todos.add(todo);
     }
+    // for (Todo todo in todos) {
+    //   saveTodoToFirestore(todo);
+    // }
     setState(() {});
   }
 
@@ -52,7 +55,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
               context, MaterialPageRoute(builder: (context) => AddTodo()));
           if (result[0] != '') {
             Todo todo = Todo(title: result[0], isChecked: false);
-            todo.id = saveTodo(todo);
+            todo.id = await saveTodoToFirestore(todo);
             todos.insert(0, todo);
           }
           setState(() {});
@@ -66,10 +69,11 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
       ),
       body: this.todos.isEmpty
           ? Center(
-              child: Text(
-                "Add a todo",
-                style: TextStyle(color: Colors.grey),
-              ),
+              child: CircularProgressIndicator(),
+              // child: Text(
+              //   "Add a todo",
+              //   style: TextStyle(color: Colors.grey),
+              // ),
             )
           : ListView.builder(
               itemCount: todos.length,
@@ -95,7 +99,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                 setState(() {
                   checked = check;
                   todo.isChecked = check;
-                  updateTodo(todo);
+                  updateTodoToFirestore(todo);
                   if (checked == true) {
                     todos.removeAt(index);
                     todos.insert(todos.length - checkedTodos.length, todo);
@@ -126,7 +130,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                 IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
-                      await deleteTodo(todo);
+                      await deleteTodoFromFirestore(todo);
                       if (todo.isChecked == true) {
                         checkedTodos.remove(todo);
                       }
