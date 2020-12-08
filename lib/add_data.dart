@@ -47,7 +47,8 @@ class _AppUsagesState extends State<AppUsages> {
                 itemCount: _infos.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                      title: Text(_infos[index].appName),
+                      title: Text(
+                          "com.${_infos[index].packageName}.${_infos[index].appName}"),
                       trailing: Text(_infos[index].usage.toString()));
                 }),
           ),
