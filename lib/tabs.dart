@@ -4,7 +4,7 @@ import 'package:example/password_manager.dart';
 import 'package:example/settings.dart';
 import 'package:example/todotab.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'auth.dart';
@@ -24,6 +24,7 @@ class _HomeState extends State<Home> {
       return null;
     } else {
       print('User is signed in!');
+      // FirebaseDatabase.instance.setPersistenceEnabled(true);
       return user;
     }
   }
@@ -61,7 +62,6 @@ class _TabsState extends State<Tabs> {
   @override
   void initState() {
     super.initState();
-    FirebaseDatabase.instance.setPersistenceEnabled(true);
     // FirebaseDatabase.instance.goOffline();
   }
 
