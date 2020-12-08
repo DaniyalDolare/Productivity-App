@@ -75,13 +75,15 @@ final user = FirebaseAuth.instance.currentUser.uid;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 Future<String> saveNoteToFirestore(Note note) async {
-  var id = firestore
+  var id = await firestore
       .collection(user)
       .doc('data')
       .collection('notes')
-      .add(note.toJson())
-      .catchError((error) => print('this is the error: $error'));
-  return await id.then((value) => value.id);
+      .add(note.toJson());
+  // .catchError((error) => print('this is the error: $error'));
+
+  return id.id;
+  //then((value) => value.id);
 }
 
 Future<List<Note>> getNotesFromFirestore() async {
@@ -134,7 +136,7 @@ Future<String> saveTodoToFirestore(Todo todo) async {
   var id = firestore
       .collection(user)
       .doc('data')
-      .collection('todo')
+      .collection('todos')
       .add(todo.toJson())
       .catchError((error) => print('this is the error: $error'));
   return await id.then((value) => value.id);
@@ -144,7 +146,7 @@ void updateTodoToFirestore(Todo todo) async {
   await firestore
       .collection(user)
       .doc('data')
-      .collection('todo')
+      .collection('todos')
       .doc(todo.id)
       .update(todo.toJson())
       .catchError((error) => print('this is the error: $error'));
@@ -154,7 +156,7 @@ Future<void> deleteTodoFromFirestore(Todo todo) async {
   await firestore
       .collection(user)
       .doc('data')
-      .collection('todo')
+      .collection('todos')
       .doc(todo.id)
       .delete()
       .catchError((error) => print('this is the error: $error'));
