@@ -1,4 +1,4 @@
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -51,11 +51,16 @@ class _NotesTabState extends State<NotesTab>
             //save note to database and get the uid from databse and save uid to note.id
             Note note =
                 new Note(title: result[0], note: result[1], time: result[2]);
-            note.setId(saveNote(note));
+
+            setState(() {
+              this.notes.insert(0, note);
+            });
+            print('saving to firestore');
+            note.setId(await saveNoteToFirestore(note));
+            print('id of saved note is ${note.id}');
             //this.notes.add(note);
-            this.notes.insert(0, note);
+
           }
-          setState(() {});
         },
         child: Icon(
           Icons.add,
@@ -63,7 +68,7 @@ class _NotesTabState extends State<NotesTab>
         ),
       ),
       body: FutureBuilder<List<Note>>(
-        future: getNotes(),
+        future: getNotesFromFirestore(), //getNotes(),
         builder: (BuildContext context, AsyncSnapshot<List<Note>> snapshot) {
           if (snapshot.hasData) {
             List<Note> fetchedNotes = snapshot.data;
@@ -71,6 +76,9 @@ class _NotesTabState extends State<NotesTab>
               return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
             });
             this.notes = fetchedNotes;
+            // for (Note note in fetchedNotes) {
+            //   saveNoteToFirestore(note);
+            // }
             return this.notes.isEmpty
                 ? Center(
                     child: Text(
@@ -91,7 +99,7 @@ class _NotesTabState extends State<NotesTab>
                     ),
                   );
           } else {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -115,7 +123,7 @@ class _NotesTabState extends State<NotesTab>
             if (result != null) {
               Note editedNote =
                   new Note(title: result[0], note: result[1], time: result[2]);
-              updateNote(editedNote, note.id);
+              updateNoteToFirestore(editedNote, note.id);
               editedNote.setId(note.id);
               int index = notes.indexWhere((element) => element.id == note.id);
               notes[index] = editedNote;
@@ -204,7 +212,7 @@ class _AddNoteState extends State<AddNote> {
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
-                deleteNote(widget.note);
+                deleteNoteFromFirestore(widget.note);
                 Navigator.pop(context);
               },
             ),
