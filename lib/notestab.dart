@@ -1,7 +1,6 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-
 import 'database.dart';
 import 'note.dart';
 
@@ -49,8 +48,11 @@ class _NotesTabState extends State<NotesTab>
                       )));
           if (result[0] != '' || result[1] != '') {
             //save note to database and get the uid from databse and save uid to note.id
-            Note note =
-                new Note(title: result[0], note: result[1], time: result[2]);
+            Note note = new Note(
+                title: result[0],
+                note: result[1],
+                time: result[2],
+                isPinned: result[3]);
 
             setState(() {
               this.notes.insert(0, note);
@@ -59,7 +61,6 @@ class _NotesTabState extends State<NotesTab>
             note.setId(await saveNoteToFirestore(note));
             print('id of saved note is ${note.id}');
             //this.notes.add(note);
-
           }
         },
         child: Icon(
@@ -71,12 +72,27 @@ class _NotesTabState extends State<NotesTab>
         future: getNotesFromFirestore(), //getNotes(),
         builder: (BuildContext context, AsyncSnapshot<List<Note>> snapshot) {
           if (snapshot.hasData) {
-            List<Note> fetchedNotes = snapshot.data;
-            fetchedNotes.sort((a, b) {
-              return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
-            });
-            this.notes = fetchedNotes;
+            this.notes = snapshot.data;
+            //List<Note> fetchedNotes = snapshot.data;
+            // fetchedNotes.sort((a, b) {
+            //   return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
+            // });
+            // List<Note> pinnedNotes = [];
             // for (Note note in fetchedNotes) {
+            //   if (note.isPinned == true) {
+            //     pinnedNotes.add(note);
+            //     print('true');
+            //   } else {
+            //     notes.add(note);
+            //   }
+            // }
+            // notes.insertAll(0, pinnedNotes);
+
+            // this.notes = fetchedNotes;
+
+            print('\n\nnotes fetched\n\n');
+            // for (Note note in fetchedNotes) {
+            //   // print(note.isPinned);
             //   saveNoteToFirestore(note);
             // }
             return this.notes.isEmpty
@@ -106,6 +122,40 @@ class _NotesTabState extends State<NotesTab>
     );
   }
 
+  void _processResult(List result, Note note) async {
+    if (result != null) {
+      if (result[0] != '' || result[1] != '') {
+        print('level 1');
+        print('old ${note.isPinned} , new ${result[3]}');
+        if (result[0] != note.title ||
+            result[1] != note.note ||
+            result[3] != note.isPinned) {
+          print('level 2');
+          print('updating');
+          Note editedNote = new Note(
+              title: result[0],
+              note: result[1],
+              time: result[2],
+              isPinned: result[3]);
+          updateNoteToFirestore(editedNote, note.id);
+          editedNote.setId(note.id);
+          //search the updated note and interchange with updated one in the list
+          int index = notes.indexWhere((element) => element.id == note.id);
+          notes[index] = editedNote;
+          setState(() {});
+        }
+      } else {
+        await deleteNoteFromFirestore(note);
+        notes.remove(note);
+        setState(() {});
+      }
+    } else {
+      await deleteNoteFromFirestore(note);
+      notes.remove(note);
+      setState(() {});
+    }
+  }
+
   Widget _drawNoteCard(Note note) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -120,20 +170,11 @@ class _NotesTabState extends State<NotesTab>
                     builder: (context) => AddNote(
                           note: note,
                         )));
-            if (result != null) {
-              Note editedNote =
-                  new Note(title: result[0], note: result[1], time: result[2]);
-              updateNoteToFirestore(editedNote, note.id);
-              editedNote.setId(note.id);
-              int index = notes.indexWhere((element) => element.id == note.id);
-              notes[index] = editedNote;
-            } else {
-              notes.remove(note);
-            }
-            setState(() {});
+            _processResult(result, note);
           },
           child: Container(
-            padding: EdgeInsets.all(10.0),
+            padding: EdgeInsets.only(
+                left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
             decoration: BoxDecoration(
               //shape: BoxShape.rectangle,
               border: Border.all(width: 1, color: Colors.grey),
@@ -143,9 +184,45 @@ class _NotesTabState extends State<NotesTab>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(''),
+                //       Icon(
+                //         Icons.pin_drop,
+                //         color: Colors.redAccent,
+                //         size: 13.0,
+                //       ),
+                //     ]),
+
+                // note.isPinned
+                //     ? Row(
+                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //         mainAxisSize: MainAxisSize.max,
+                //         children: [
+                //           Container(
+                //             width: MediaQuery.of(context).size.width * 0.37,
+                //             child: Text(
+                //               note.title,
+                //               style: TextStyle(fontSize: 21.0),
+                //               overflow: TextOverflow.fade,
+                //             ),
+                //           ),
+                //           Icon(
+                //             Icons.pin_drop,
+                //             color: Colors.redAccent,
+                //             size: 15.0,
+                //           )
+                //         ],
+                //       )
+                //     : Text(
+                //         note.title,
+                //         style: TextStyle(fontSize: 21.0),
+                //         // textScaleFactor: 1.5,
+                //       ),
                 Text(
                   note.title,
-                  textScaleFactor: 1.5,
+                  style: TextStyle(fontSize: 21.0),
                 ),
                 Padding(padding: EdgeInsets.all(4.0)),
                 Text(
@@ -164,6 +241,7 @@ class _NotesTabState extends State<NotesTab>
 
 class AddNote extends StatefulWidget {
   final Note note;
+  bool isPinned;
   AddNote({this.note});
   @override
   _AddNoteState createState() => _AddNoteState();
@@ -172,10 +250,12 @@ class AddNote extends StatefulWidget {
 class _AddNoteState extends State<AddNote> {
   TextEditingController titleController;
   TextEditingController noteController;
+
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.note.title);
     noteController = TextEditingController(text: widget.note.note);
+    widget.isPinned = this.widget.note.isPinned ?? false;
   }
 
   @override
@@ -192,7 +272,8 @@ class _AddNoteState extends State<AddNote> {
         Navigator.pop(context, [
           titleController.text,
           noteController.text,
-          DateTime.now().toString()
+          DateTime.now().toString(),
+          widget.isPinned
         ]);
         return true;
       },
@@ -204,17 +285,32 @@ class _AddNoteState extends State<AddNote> {
               Navigator.pop(context, [
                 titleController.text,
                 noteController.text,
-                DateTime.now().toString()
+                DateTime.now().toString(),
+                widget.isPinned
               ]);
             },
           ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                deleteNoteFromFirestore(widget.note);
-                Navigator.pop(context);
-              },
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.pin_drop,
+                    color: widget.isPinned ? Colors.redAccent : Colors.grey,
+                  ),
+                  onPressed: () {
+                    widget.isPinned = !widget.isPinned;
+                    setState(() {});
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    // deleteNoteFromFirestore(widget.note);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
           ],
           backgroundColor: Colors.black12,
