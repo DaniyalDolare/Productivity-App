@@ -46,21 +46,23 @@ class _NotesTabState extends State<NotesTab>
                   builder: (context) => AddNote(
                         note: Note(),
                       )));
-          if (result[0] != '' || result[1] != '') {
-            //save note to database and get the uid from databse and save uid to note.id
-            Note note = new Note(
-                title: result[0],
-                note: result[1],
-                time: result[2],
-                isPinned: result[3]);
+          if (result != null) {
+            if (result[0] != '' || result[1] != '') {
+              //save note to database and get the uid from databse and save uid to note.id
+              Note note = new Note(
+                  title: result[0],
+                  note: result[1],
+                  time: result[2],
+                  isPinned: result[3]);
 
-            setState(() {
-              this.notes.insert(0, note);
-            });
-            print('saving to firestore');
-            note.setId(await saveNoteToFirestore(note));
-            print('id of saved note is ${note.id}');
-            //this.notes.add(note);
+              setState(() {
+                this.notes.insert(0, note);
+              });
+              print('saving to firestore');
+              note.setId(await saveNoteToFirestore(note));
+              print('id of saved note is ${note.id}');
+              //this.notes.add(note);
+            }
           }
         },
         child: Icon(
@@ -241,7 +243,6 @@ class _NotesTabState extends State<NotesTab>
 
 class AddNote extends StatefulWidget {
   final Note note;
-  bool isPinned;
   AddNote({this.note});
   @override
   _AddNoteState createState() => _AddNoteState();
@@ -250,12 +251,13 @@ class AddNote extends StatefulWidget {
 class _AddNoteState extends State<AddNote> {
   TextEditingController titleController;
   TextEditingController noteController;
+  bool pinned;
 
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.note.title);
     noteController = TextEditingController(text: widget.note.note);
-    widget.isPinned = this.widget.note.isPinned ?? false;
+    pinned = this.widget.note.isPinned ?? false;
   }
 
   @override
@@ -273,7 +275,7 @@ class _AddNoteState extends State<AddNote> {
           titleController.text,
           noteController.text,
           DateTime.now().toString(),
-          widget.isPinned
+          pinned
         ]);
         return true;
       },
@@ -286,7 +288,7 @@ class _AddNoteState extends State<AddNote> {
                 titleController.text,
                 noteController.text,
                 DateTime.now().toString(),
-                widget.isPinned
+                pinned
               ]);
             },
           ),
@@ -296,10 +298,10 @@ class _AddNoteState extends State<AddNote> {
                 IconButton(
                   icon: Icon(
                     Icons.pin_drop,
-                    color: widget.isPinned ? Colors.redAccent : Colors.grey,
+                    color: pinned ? Colors.redAccent : Colors.grey,
                   ),
                   onPressed: () {
-                    widget.isPinned = !widget.isPinned;
+                    pinned = !pinned;
                     setState(() {});
                   },
                 ),
