@@ -94,6 +94,7 @@ Future<List<Note>> getNotesFromFirestore() async {
       .get(GetOptions(source: Source.serverAndCache));
 
   List<Note> notes = [];
+  List<Note> fetchedNotes = [];
 
   if (dataSnapshot.docs.isNotEmpty) {
     for (QueryDocumentSnapshot values in dataSnapshot.docs) {
@@ -101,11 +102,28 @@ Future<List<Note>> getNotesFromFirestore() async {
       // print(values.reference);
       var id = values.id;
       var data = values.data();
-      Note note =
-          Note(title: data['title'], note: data['note'], time: data['time']);
+      Note note = Note(
+          title: data['title'],
+          note: data['note'],
+          time: data['time'],
+          isPinned: data['isPinned'] ?? false);
       note.setId(id.toString());
-      notes.add(note);
+      fetchedNotes.add(note);
     }
+
+    fetchedNotes.sort((a, b) {
+      return DateTime.parse(b.time).compareTo(DateTime.parse(a.time));
+    });
+    List<Note> pinnedNotes = [];
+    for (Note note in fetchedNotes) {
+      if (note.isPinned == true) {
+        pinnedNotes.add(note);
+        print('true');
+      } else {
+        notes.add(note);
+      }
+    }
+    notes.insertAll(0, pinnedNotes);
   } else {
     print('No data');
   }
