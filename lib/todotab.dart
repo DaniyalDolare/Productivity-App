@@ -19,29 +19,29 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchTodo();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchTodo();
+  // }
 
-  void fetchTodo() async {
-    List<Todo> fetchedTodos = await getTodosFromFirestore();
-    for (Todo todo in fetchedTodos) {
-      if (todo.isChecked == true) {
-        checkedTodos.add(todo);
-      } else {
-        todos.add(todo);
-      }
-    }
-    for (Todo todo in checkedTodos) {
-      todos.add(todo);
-    }
-    // for (Todo todo in todos) {
-    //   saveTodoToFirestore(todo);
-    // }
-    setState(() {});
-  }
+  // void fetchTodo() async {
+  //   List<Todo> fetchedTodos = await getTodosFromFirestore();
+  //   for (Todo todo in fetchedTodos) {
+  //     if (todo.isChecked == true) {
+  //       checkedTodos.add(todo);
+  //     } else {
+  //       todos.add(todo);
+  //     }
+  //   }
+  //   for (Todo todo in checkedTodos) {
+  //     todos.add(todo);
+  //   }
+  //   // for (Todo todo in todos) {
+  //   //   saveTodoToFirestore(todo);
+  //   // }
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +67,54 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           size: 30,
         ),
       ),
-      body: this.todos.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(),
-              // child: Text(
-              //   "Add a todo",
-              //   style: TextStyle(color: Colors.grey),
-              // ),
-            )
-          : ListView.builder(
-              itemCount: todos.length,
-              itemBuilder: (BuildContext context, int index) =>
-                  drawTodo(todos[index], index),
-            ),
+      body: FutureBuilder(
+        future: getTodosFromFirestore(),
+        builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
+          if (snapshot.hasData) {
+            print('todes fetched');
+            print(todos.length);
+            todos = [];
+            checkedTodos = [];
+            for (Todo todo in snapshot.data) {
+              if (todo.isChecked == true) {
+                checkedTodos.add(todo);
+              } else {
+                todos.add(todo);
+              }
+            }
+            for (Todo todo in checkedTodos) {
+              todos.add(todo);
+            }
+            return this.todos.isEmpty
+                ? Center(
+                    child: Text(
+                      "Add a todo",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: todos.length,
+                    itemBuilder: (BuildContext context, int index) =>
+                        drawTodo(todos[index], index),
+                  );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+      // body: this.todos.isEmpty
+      //     ? Center(
+      //         child: CircularProgressIndicator(),
+      //         // child: Text(
+      //         //   "Add a todo",
+      //         //   style: TextStyle(color: Colors.grey),
+      //         // ),
+      //       )
+      //     : ListView.builder(
+      //         itemCount: todos.length,
+      //         itemBuilder: (BuildContext context, int index) =>
+      //             drawTodo(todos[index], index),
+      //       ),
     );
   }
 
@@ -153,6 +188,7 @@ class AddTodo extends StatefulWidget {
 
 class _AddTodoState extends State<AddTodo> {
   TextEditingController titleController = new TextEditingController();
+  bool remind = false;
 
   @override
   void dispose() {
@@ -185,13 +221,36 @@ class _AddTodoState extends State<AddTodo> {
         backgroundColor: Colors.grey[900],
         body: Container(
           margin: EdgeInsets.all(10),
-          child: TextField(
-            controller: titleController,
-            textCapitalization: TextCapitalization.sentences,
-            decoration:
-                InputDecoration(hintText: "Title", border: InputBorder.none),
-            style: TextStyle(fontSize: 23),
-          ),
+          child: Column(children: [
+            TextField(
+              controller: titleController,
+              textCapitalization: TextCapitalization.sentences,
+              decoration:
+                  InputDecoration(hintText: "Title", border: InputBorder.none),
+              style: TextStyle(fontSize: 23),
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Reminder', style: TextStyle(fontSize: 18.0)),
+                Switch(
+                    activeColor: Colors.redAccent,
+                    value: remind,
+                    onChanged: (value) {
+                      remind = value;
+                      setState(() {});
+                    })
+              ],
+            ),
+            remind
+                ? Container(
+                    child: Text('when?'),
+                  )
+                : Text(''),
+          ]),
         ),
       ),
     );
