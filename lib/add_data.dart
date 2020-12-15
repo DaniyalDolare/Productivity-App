@@ -10,13 +10,15 @@ class AppUsages extends StatefulWidget {
 class _AppUsagesState extends State<AppUsages> {
   List _infos = [];
   TextEditingController startdate = TextEditingController();
+  int _selected = 0;
 
   void getUsageStats() async {
     DateTime startDate = DateTime.parse(startdate.text);
     try {
       _infos = [];
-      // DateTime startDate = DateTime(
-      //     DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      DateTime today = DateTime.now();
+      DateTime yesterday = today.subtract(Duration(days: 1));
+
       Map<String, dynamic> appData = Map();
       DateTime endDate = new DateTime.now();
       List<AppUsageInfo> appsWithUsage =
@@ -56,6 +58,31 @@ class _AppUsagesState extends State<AppUsages> {
     }
   }
 
+  List<Widget> _buttonGroup() {
+    List title = ['Today', 'This Week', 'Custom'];
+    List<Widget> buttons = List();
+    for (int i = 0; i < 3; i++) {
+      buttons.add(FlatButton(
+        splashColor: Colors.redAccent,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+                color: _selected == i ? Colors.redAccent : Colors.grey)),
+        onPressed: () {
+          setState(() {
+            _selected = i;
+          });
+        },
+        child: Text(
+          title[i],
+          style: TextStyle(
+              color: _selected == i ? Colors.white : Colors.grey[400]),
+        ),
+      ));
+    }
+    return buttons;
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -67,6 +94,32 @@ class _AppUsagesState extends State<AppUsages> {
     return Scaffold(
       body: Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: _buttonGroup()
+            // FlatButton(
+            //   shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(20),
+            //       side: BorderSide(color: Colors.redAccent)),
+            //   onPressed: () {},
+            //   child: Text('Today'),
+            // ),
+            // FlatButton(
+            //   shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(20),
+            //       side: BorderSide(color: Colors.grey)),
+            //   onPressed: () {},
+            //   child: Text('This Week'),
+            // ),
+            // FlatButton(
+            //   shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(20),
+            //       side: BorderSide(color: Colors.grey)),
+            //   onPressed: () {},
+            //   child: Text('Custom'),
+            // ),
+            ,
+          ),
           TextField(
             controller: startdate,
             keyboardType: TextInputType.datetime,
@@ -78,9 +131,6 @@ class _AppUsagesState extends State<AppUsages> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     contentPadding: EdgeInsets.all(8.0),
-                    // title: Text(
-                    //     "com.${_infos[index].packageName}.${_infos[index].appName}"),
-                    // trailing: Text(_infos[index].usage.toString()));
                     leading: CircleAvatar(
                       radius: 25.0,
                       backgroundImage: MemoryImage(_infos[index]['icon']),
