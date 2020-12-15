@@ -54,7 +54,8 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           List result = await Navigator.push(
               context, MaterialPageRoute(builder: (context) => AddTodo()));
           if (result[0] != '') {
-            Todo todo = Todo(title: result[0], isChecked: false);
+            Todo todo =
+                Todo(title: result[0], isChecked: false, time: result[1]);
             todo.id = await saveTodoToFirestore(todo);
             todos.insert(0, todo);
           }
@@ -200,9 +201,8 @@ class _AddTodoState extends State<AddTodo> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context, [
-          titleController.text,
-        ]);
+        Navigator.pop(
+            context, [titleController.text, DateTime.now().toString()]);
         return true;
       },
       child: Scaffold(
@@ -210,9 +210,8 @@ class _AddTodoState extends State<AddTodo> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context, [
-                titleController.text,
-              ]);
+              Navigator.pop(
+                  context, [titleController.text, DateTime.now().toString()]);
             },
           ),
           backgroundColor: Colors.black12,

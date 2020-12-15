@@ -193,12 +193,18 @@ Future<List<Todo>> getTodosFromFirestore() async {
     for (QueryDocumentSnapshot values in querySnapshot.docs) {
       var id = values.id;
       var data = values.data();
-      Todo todo = Todo(title: data['title'], isChecked: data['isChecked']);
+      Todo todo = Todo(
+          title: data['title'],
+          isChecked: data['isChecked'],
+          time: data['time'] ?? DateTime.now().toString());
       todo.id = id.toString();
       todos.add(todo);
     }
+    todos.sort(
+        (a, b) => DateTime.parse(b.time).compareTo(DateTime.parse(a.time)));
   } else {
     print('no data');
   }
+
   return todos;
 }
