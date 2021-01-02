@@ -1,56 +1,14 @@
 import 'package:example/add_data.dart';
+import 'package:example/screens/home%20screen/tabs/habitstab.dart';
 import 'package:example/login.dart';
 import 'package:example/password_manager.dart';
 import 'package:example/settings.dart';
-import 'package:example/todotab.dart';
+import 'package:example/screens/home%20screen/tabs/todotab.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'auth.dart';
-import 'notestab.dart';
-
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  Future<User> _checkLoginState() async {
-    User user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      print('User is currently signed out!');
-      return null;
-    } else {
-      print('User is signed in!');
-      // FirebaseDatabase.instance.setPersistenceEnabled(true);
-      return user;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          brightness: Brightness.dark,
-          primarySwatch: Colors.red,
-          primaryColor: Colors.red),
-      home: FutureBuilder<User>(
-          future: _checkLoginState(),
-          builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-            if (snapshot.hasData) {
-              //User user = snapshot.data;
-              // this is your user instance
-              /// is because there is user already logged
-              return Tabs();
-            }
-            // other way there is no user logged.
-            return LoginPage();
-          }),
-    );
-  }
-}
+import '../../services/auth.dart';
+import 'tabs/notestab.dart';
 
 class Tabs extends StatefulWidget {
   @override
@@ -176,7 +134,7 @@ class _TabsState extends State<Tabs> {
         ),
         backgroundColor: Colors.grey[900],
         body: TabBarView(
-          children: [NotesTab(), TodoTab(), AppUsages()],
+          children: [NotesTab(), TodoTab(), HabitsTab()],
         ),
       ),
     );

@@ -1,7 +1,7 @@
-import 'package:example/todo.dart';
+import 'package:example/models/todo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_database/firebase_database.dart';
-import 'note.dart';
+import '../models/note.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // final databaseReference = FirebaseDatabase.instance.reference();

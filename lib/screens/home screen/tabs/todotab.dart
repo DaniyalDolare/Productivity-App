@@ -1,7 +1,8 @@
-import 'package:example/database.dart';
-import 'package:example/todo.dart';
+import 'package:example/services/database.dart';
+import 'package:example/models/todo.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:example/screens/add%20todo/addtodo.dart';
 
 class TodoTab extends StatefulWidget {
   @override
@@ -177,80 +178,6 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class AddTodo extends StatefulWidget {
-  @override
-  _AddTodoState createState() => _AddTodoState();
-}
-
-class _AddTodoState extends State<AddTodo> {
-  TextEditingController titleController = new TextEditingController();
-  bool remind = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-    titleController.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(
-            context, [titleController.text, DateTime.now().toString()]);
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(
-                  context, [titleController.text, DateTime.now().toString()]);
-            },
-          ),
-          backgroundColor: Colors.black12,
-          iconTheme: IconThemeData(color: Colors.grey),
-        ),
-        backgroundColor: Colors.grey[900],
-        body: Container(
-          margin: EdgeInsets.all(10),
-          child: Column(children: [
-            TextField(
-              controller: titleController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration:
-                  InputDecoration(hintText: "Title", border: InputBorder.none),
-              style: TextStyle(fontSize: 23),
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Reminder', style: TextStyle(fontSize: 18.0)),
-                Switch(
-                    activeColor: Colors.redAccent,
-                    value: remind,
-                    onChanged: (value) {
-                      remind = value;
-                      setState(() {});
-                    })
-              ],
-            ),
-            remind
-                ? Container(
-                    child: Text('when?'),
-                  )
-                : Text(''),
-          ]),
-        ),
       ),
     );
   }

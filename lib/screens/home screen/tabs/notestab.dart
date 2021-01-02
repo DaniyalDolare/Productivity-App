@@ -1,8 +1,8 @@
 // import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'database.dart';
-import 'note.dart';
+import '../../../services/database.dart';
+import '../../../models/note.dart';
 
 class NotesTab extends StatefulWidget {
   @override
