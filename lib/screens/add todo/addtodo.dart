@@ -24,8 +24,10 @@ class _AddTodoState extends State<AddTodo> {
   }
 
   ///Function to format TimeOfDay to hh:mm AM/PM string format
-  String _formatTime(TimeOfDay time) =>
-      "${time.replacing(hour: time.hourOfPeriod).hour.toString().padLeft(2, "0")}:${time.minute.toString().padLeft(2, "0")} ${time.hour < 12 ? "AM" : "PM"}";
+  String _formatTime(TimeOfDay time) {
+    var hour = time.hour == 12 ? time.hour : time.hour - time.periodOffset;
+    return "${time.replacing(hour: hour).hour.toString().padLeft(2, "0")}:${time.minute.toString().padLeft(2, "0")} ${time.hour < 12 ? "AM" : "PM"}";
+  }
 
   void _showTimePicker() async {
     TimeOfDay pickedTime =
