@@ -1,8 +1,8 @@
-import 'package:example/tabs.dart';
+import 'package:example/screens/home%20screen/tabs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'auth.dart';
+import 'services/auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override

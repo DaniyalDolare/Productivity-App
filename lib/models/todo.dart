@@ -1,7 +1,10 @@
+import 'package:example/models/reminder.dart';
+
 class Todo {
   String title;
   bool isChecked;
   String time;
+  Reminder reminder;
   String data;
   List<Todo> subTodo = [];
   String id;

@@ -1,3 +1,5 @@
+import 'package:example/main.dart';
+import 'package:example/models/reminder.dart';
 import 'package:example/services/database.dart';
 import 'package:example/models/todo.dart';
 import 'package:flutter/cupertino.dart';
@@ -57,6 +59,11 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           if (result[0] != '') {
             Todo todo =
                 Todo(title: result[0], isChecked: false, time: result[1]);
+            if (result[2] != null) {
+              todo.reminder = result[2];
+              todo.reminder.title = todo.title;
+              addReminder(todo.reminder);
+            }
             todo.id = await saveTodoToFirestore(todo);
             todos.insert(0, todo);
           }
@@ -168,6 +175,8 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                     icon: Icon(Icons.delete),
                     onPressed: () async {
                       await deleteTodoFromFirestore(todo);
+                      // cancel the notification with id value of zero
+                      await flutterLocalNotificationsPlugin.cancel(0);
                       if (todo.isChecked == true) {
                         checkedTodos.remove(todo);
                       }

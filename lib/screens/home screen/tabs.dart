@@ -1,4 +1,3 @@
-import 'package:example/add_data.dart';
 import 'package:example/screens/home%20screen/tabs/habitstab.dart';
 import 'package:example/login.dart';
 import 'package:example/password_manager.dart';
