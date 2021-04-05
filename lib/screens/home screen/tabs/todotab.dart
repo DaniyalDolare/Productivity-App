@@ -57,6 +57,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           List result = await Navigator.push(
               context, MaterialPageRoute(builder: (context) => AddTodo()));
           if (result[0] != '') {
+            //if todo title is not empty then create todo
             Todo todo =
                 Todo(title: result[0], isChecked: false, time: result[1]);
             if (result[2] != null) {
@@ -175,8 +176,9 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                     icon: Icon(Icons.delete),
                     onPressed: () async {
                       await deleteTodoFromFirestore(todo);
-                      // cancel the notification with id value of zero
-                      await flutterLocalNotificationsPlugin.cancel(0);
+                      if (todo.reminder != null)
+                        // cancel the notification with id value of zero
+                        await flutterLocalNotificationsPlugin.cancel(0);
                       if (todo.isChecked == true) {
                         checkedTodos.remove(todo);
                       }
