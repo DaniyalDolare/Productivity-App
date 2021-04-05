@@ -92,8 +92,11 @@ class _AddTodoState extends State<AddTodo> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context,
-            [titleController.text, DateTime.now().toString(), reminders[0]]);
+        Navigator.pop(context, [
+          titleController.text,
+          DateTime.now().toString(),
+          reminders.isEmpty ? null : reminders[0]
+        ]);
         return true;
       },
       child: Scaffold(
@@ -104,7 +107,7 @@ class _AddTodoState extends State<AddTodo> {
               Navigator.pop(context, [
                 titleController.text,
                 DateTime.now().toString(),
-                reminders[0]
+                reminders.isEmpty ? null : reminders[0]
               ]);
             },
           ),
@@ -163,16 +166,16 @@ class _AddTodoState extends State<AddTodo> {
                                         initialText: "Date",
                                         controller: dateController,
                                         icon: Icons.calendar_today),
-                                    Container(
-                                      margin: EdgeInsets.all(8.0),
-                                      padding: EdgeInsets.only(
-                                          left: 8.0, right: 8.0),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: Colors.grey[700]),
-                                      child: Text("Do not repeat"),
-                                    ),
+                                    // Container(
+                                    //   margin: EdgeInsets.all(8.0),
+                                    //   padding: EdgeInsets.only(
+                                    //       left: 8.0, right: 8.0),
+                                    //   decoration: BoxDecoration(
+                                    //       borderRadius:
+                                    //           BorderRadius.circular(10),
+                                    //       color: Colors.grey[700]),
+                                    //   child: Text("Do not repeat"),
+                                    // ),
                                     SizedBox(
                                       height: 10,
                                     ),
