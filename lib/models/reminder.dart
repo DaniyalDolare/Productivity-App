@@ -18,6 +18,7 @@ void addReminder(Reminder reminder) async {
       .add(Duration(hours: reminder.time.hour, minutes: reminder.time.minute));
 
   //initialize time zones
+
   t.initializeTimeZones();
 
   //get current local timezone name
@@ -41,8 +42,10 @@ void addReminder(Reminder reminder) async {
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics);
 
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-      0, "Todo", reminder.title, scheduledDate, platformChannelSpecifics,
+  //id for each reminder should be different
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(reminder.date.microsecond,
+      "Todo", reminder.title, scheduledDate, platformChannelSpecifics,
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime);
