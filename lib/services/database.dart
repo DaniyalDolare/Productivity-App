@@ -97,11 +97,10 @@ Future<List<Note>> getNotesFromFirestore() async {
   List<Note> fetchedNotes = [];
 
   if (dataSnapshot.docs.isNotEmpty) {
+    print(dataSnapshot.docs);
     for (QueryDocumentSnapshot values in dataSnapshot.docs) {
-      // print(values.id);
-      // print(values.reference);
       var id = values.id;
-      var data = values.data();
+      var data = values.data() as Map;
       Note note = Note(
           title: data['title'],
           note: data['note'],
@@ -156,7 +155,9 @@ Future<String> saveTodoToFirestore(Todo todo) async {
       .doc('data')
       .collection('todos')
       .add(todo.toJson())
-      .catchError((error) => print('this is the error: $error'));
+      .catchError((error) {
+    print('this is the error: $error');
+  });
   return await id.then((value) => value.id);
 }
 
@@ -188,11 +189,10 @@ Future<List<Todo>> getTodosFromFirestore() async {
       .get(GetOptions(source: Source.serverAndCache));
 
   List<Todo> todos = [];
-
   if (querySnapshot.docs.isNotEmpty) {
     for (QueryDocumentSnapshot values in querySnapshot.docs) {
       var id = values.id;
-      var data = values.data();
+      var data = values.data() as Map;
       Todo todo = Todo(
           title: data['title'],
           isChecked: data['isChecked'],
