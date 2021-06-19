@@ -23,11 +23,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: OutlineButton(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(45)),
-          borderSide: BorderSide(color: Colors.redAccent),
-          splashColor: Colors.redAccent,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+              primary: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(45),
+              ),
+              side: BorderSide(color: Colors.redAccent)),
           onPressed: () {
             click();
           },

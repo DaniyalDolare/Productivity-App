@@ -182,7 +182,9 @@ class _AddTodoState extends State<AddTodo> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        FlatButton(
+                                        TextButton(
+                                            style: TextButton.styleFrom(
+                                                primary: Colors.white),
                                             onPressed: () {
                                               Navigator.pop(context);
                                               timeController.clear();
@@ -192,7 +194,7 @@ class _AddTodoState extends State<AddTodo> {
                                         SizedBox(
                                           width: 10,
                                         ),
-                                        FlatButton(
+                                        TextButton(
                                           onPressed: () {
                                             Navigator.pop(
                                                 context, [time, date]);
@@ -200,10 +202,14 @@ class _AddTodoState extends State<AddTodo> {
                                             dateController.clear();
                                           },
                                           child: Text("Save"),
-                                          color: Colors.redAccent,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0)),
+                                          style: TextButton.styleFrom(
+                                              primary: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0)),
+                                              backgroundColor:
+                                                  Colors.redAccent),
                                         ),
                                         SizedBox(
                                           width: 10,

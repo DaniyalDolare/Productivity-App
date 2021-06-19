@@ -39,7 +39,7 @@ class _SetttingsState extends State<Setttings> {
               user.email,
             ),
             Padding(padding: EdgeInsets.all(10)),
-            FlatButton(
+            TextButton(
               onPressed: () {
                 signOutGoogle();
                 Navigator.pushAndRemoveUntil(
@@ -48,9 +48,11 @@ class _SetttingsState extends State<Setttings> {
                     (route) => false);
               },
               child: Text("LogOut"),
-              color: Colors.redAccent,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(40)),
+              style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40)),
+                  primary: Colors.white,
+                  backgroundColor: Colors.redAccent),
             )
           ],
         ),
