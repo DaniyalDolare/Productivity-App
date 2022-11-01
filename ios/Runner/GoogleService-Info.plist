@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>34420096376-rtb1dnareopcpe2a8v7ij4goetglas7k.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.34420096376-rtb1dnareopcpe2a8v7ij4goetglas7k</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>34420096376-0p3cnhjaknbfjsq7odicrd0gc9jka060.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDWaAhYmLfdefG3xN1d6uM53TW2NWwr75o</string>
+	<key>GCM_SENDER_ID</key>
+	<string>34420096376</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.productivityApp</string>
+	<key>PROJECT_ID</key>
+	<string>productivity-app-e63c8</string>
+	<key>STORAGE_BUCKET</key>
+	<string>productivity-app-e63c8.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:34420096376:ios:afc5dd5db9f40568bf5c8d</string>
+	<key>DATABASE_URL</key>
+	<string>https://productivity-app-e63c8.firebaseio.com</string>
+</dict>
+</plist>
