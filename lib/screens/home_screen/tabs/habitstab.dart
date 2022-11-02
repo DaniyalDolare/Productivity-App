@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class HabitsTab extends StatefulWidget {
+  const HabitsTab({Key? key}) : super(key: key);
+
   @override
-  _HabitsTabState createState() => _HabitsTabState();
+  State<HabitsTab> createState() => _HabitsTabState();
 }
 
 class _HabitsTabState extends State<HabitsTab> {
@@ -14,8 +15,8 @@ class _HabitsTabState extends State<HabitsTab> {
         body: ListView(
           children: [
             Container(
-              margin: EdgeInsets.only(top: 10, right: 10, left: 10),
-              padding: EdgeInsets.all(10),
+              margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey, width: 0.5)),
@@ -25,7 +26,7 @@ class _HabitsTabState extends State<HabitsTab> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
+                    children: const [
                       Text(
                         "No Instagram",
                         style: TextStyle(fontSize: 20),
@@ -34,24 +35,18 @@ class _HabitsTabState extends State<HabitsTab> {
                     ],
                   ),
                   Row(
-                    children: [
-                      Container(
-                        child: Icon(Icons.done),
-                      ),
-                      Container(
-                        child: Icon(Icons.close),
-                      ),
-                      Container(
-                        child: Icon(Icons.skip_next_sharp),
-                      )
+                    children: const [
+                      Icon(Icons.done),
+                      Icon(Icons.close),
+                      Icon(Icons.skip_next_sharp)
                     ],
                   )
                 ],
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 10, right: 10, left: 10),
-              padding: EdgeInsets.all(10),
+              margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey, width: 0.5)),
@@ -61,7 +56,7 @@ class _HabitsTabState extends State<HabitsTab> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
+                    children: const [
                       Text(
                         "Study",
                         style: TextStyle(fontSize: 20),
@@ -70,16 +65,10 @@ class _HabitsTabState extends State<HabitsTab> {
                     ],
                   ),
                   Row(
-                    children: [
-                      Container(
-                        child: Icon(Icons.done),
-                      ),
-                      Container(
-                        child: Icon(Icons.close),
-                      ),
-                      Container(
-                        child: Icon(Icons.timelapse),
-                      )
+                    children: const [
+                      Icon(Icons.done),
+                      Icon(Icons.close),
+                      Icon(Icons.timelapse)
                     ],
                   )
                 ],

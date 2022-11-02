@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PasswordManager extends StatefulWidget {
+  const PasswordManager({Key? key}) : super(key: key);
+
   @override
-  _PasswordManagerState createState() => _PasswordManagerState();
+  State<PasswordManager> createState() => _PasswordManagerState();
 }
 
 class _PasswordManagerState extends State<PasswordManager> {
@@ -12,7 +14,7 @@ class _PasswordManagerState extends State<PasswordManager> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black12,
-        iconTheme: IconThemeData(color: Colors.grey),
+        iconTheme: const IconThemeData(color: Colors.grey),
       ),
       backgroundColor: Colors.grey[900],
       body: InkWell(
@@ -21,19 +23,19 @@ class _PasswordManagerState extends State<PasswordManager> {
         },
         child: Container(
           color: Colors.transparent,
-          padding: EdgeInsets.all(8.0),
-          margin: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              CircleAvatar(),
-              SizedBox(
+              const CircleAvatar(),
+              const SizedBox(
                 width: 15.0,
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: const [
                     Text("Facebook"),
                     Text(
                       "Daniyal",
@@ -43,9 +45,10 @@ class _PasswordManagerState extends State<PasswordManager> {
                 ),
               ),
               IconButton(
-                  icon: Icon(Icons.copy),
+                  icon: const Icon(Icons.copy),
                   onPressed: () async {
-                    await Clipboard.setData(ClipboardData(text: "Copied"));
+                    await Clipboard.setData(
+                        const ClipboardData(text: "Copied"));
                   })
             ],
           ),
@@ -53,19 +56,21 @@ class _PasswordManagerState extends State<PasswordManager> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => AddPassword()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const AddPassword()));
         },
-        child: Icon(Icons.add),
         backgroundColor: Colors.redAccent,
+        child: const Icon(Icons.add),
       ),
     );
   }
 }
 
 class AddPassword extends StatefulWidget {
+  const AddPassword({Key? key}) : super(key: key);
+
   @override
-  _AddPasswordState createState() => _AddPasswordState();
+  State<AddPassword> createState() => _AddPasswordState();
 }
 
 class _AddPasswordState extends State<AddPassword> {
@@ -77,7 +82,7 @@ class _AddPasswordState extends State<AddPassword> {
       ),
       backgroundColor: Colors.grey[900],
       body: Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
@@ -92,10 +97,10 @@ class _AddPasswordState extends State<AddPassword> {
                   hintText: "Name of App/Website",
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: Colors.red, width: 2.0),
+                    borderSide: const BorderSide(color: Colors.red, width: 2.0),
                   )),
             ),
-            Padding(padding: EdgeInsets.all(7.0)),
+            const Padding(padding: EdgeInsets.all(7.0)),
             TextFormField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -103,12 +108,12 @@ class _AddPasswordState extends State<AddPassword> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide(color: Colors.red, width: 2.0),
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
                 ),
                 hintText: "Username/E-mail",
               ),
             ),
-            Padding(padding: EdgeInsets.all(7.0)),
+            const Padding(padding: EdgeInsets.all(7.0)),
             TextFormField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -116,7 +121,7 @@ class _AddPasswordState extends State<AddPassword> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide(color: Colors.red, width: 2.0),
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
                 ),
                 hintText: "Password",
               ),

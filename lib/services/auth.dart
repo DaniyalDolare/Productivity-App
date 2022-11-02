@@ -1,34 +1,55 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn googleSignIn = GoogleSignIn();
+class AuthService {
+  AuthService._();
 
-Future<User> signInWithGoogle() async {
-  final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
+  static Future<User?> signInWithGoogle() async {
+    if (kIsWeb) {
+      // The `GoogleAuthProvider` can only be used while running on the web
+      GoogleAuthProvider authProvider = GoogleAuthProvider();
 
-  final GoogleAuthCredential credential = GoogleAuthProvider.credential(
-      idToken: googleSignInAuthentication.idToken,
-      accessToken: googleSignInAuthentication.accessToken);
+      try {
+        final UserCredential userCredential =
+            await _auth.signInWithPopup(authProvider);
 
-  final UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
+        return userCredential.user;
+      } catch (e) {
+        debugPrint('error on web signin: $e');
+        return null;
+      }
+    } else {
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
 
-  final User user = userCredential.user;
+      if (googleSignInAccount == null) return null;
 
-  assert(!user.isAnonymous);
-  assert(await user.getIdToken() != null);
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
 
-  final User currentUser = _auth.currentUser;
-  assert(currentUser.uid == user.uid);
-  print(currentUser.displayName);
-  return user;
-}
+      final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+              idToken: googleSignInAuthentication.idToken,
+              accessToken: googleSignInAuthentication.accessToken)
+          as GoogleAuthCredential;
 
-Future<void> signOutGoogle() async {
-  await googleSignIn.signOut();
-  await _auth.signOut();
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      final User user = userCredential.user!;
+
+      final User currentUser = _auth.currentUser!;
+      assert(currentUser.uid == user.uid);
+      debugPrint(currentUser.displayName);
+      return user;
+    }
+  }
+
+  static Future<void> signOutGoogle() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+  }
 }

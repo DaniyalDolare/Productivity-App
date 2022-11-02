@@ -1,15 +1,17 @@
-import 'package:example/screens/home%20screen/tabs.dart';
 import 'package:flutter/material.dart';
-import 'services/auth.dart';
+import '../../services/auth.dart';
+import '../home_screen/tabs.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
+          const Text(
             "Welcome",
             style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),
           ),
@@ -20,15 +22,20 @@ class LoginPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(45),
                   ),
-                  side: BorderSide(color: Colors.redAccent)),
+                  side: const BorderSide(color: Colors.redAccent)),
               onPressed: () async {
-                await signInWithGoogle().then((user) => {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => Tabs()))
-                    });
+                await AuthService.signInWithGoogle().then((user) {
+                  if (user != null) {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => const Tabs()));
+                  }
+                  return user;
+                }, onError: (Object error) {
+                  debugPrint("Error occured while signing in: ${error.toString()}");
+                });
               },
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
                 child: Text("Login with Google"),
               ),
             ),

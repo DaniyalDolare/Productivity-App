@@ -1,22 +1,87 @@
+import 'dart:convert';
+
 class Note {
-  final String title;
-  final String note;
-  final String time;
-  bool isPinned = false;
-  String id;
+  String? id;
+  String? title;
+  String? note;
+  String? time;
+  bool? isPinned = false;
 
-  Note({this.title, this.note, this.time, this.isPinned});
+  Note({
+    this.id,
+    this.title,
+    this.note,
+    this.time,
+    this.isPinned,
+  });
 
-  void setId(String id) {
+  void setId(String? id) {
     this.id = id;
   }
 
-  Map<String, dynamic> toJson() {
+  Note copyWith({
+    String? id,
+    String? title,
+    String? note,
+    String? time,
+    bool? isPinned,
+  }) {
+    return Note(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      note: note ?? this.note,
+      time: time ?? this.time,
+      isPinned: isPinned ?? this.isPinned,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
     return {
-      'title': this.title,
-      'note': this.note,
-      'time': this.time.toString(),
-      'isPinned': this.isPinned
+      'id': id,
+      'title': title,
+      'note': note,
+      'time': time,
+      'isPinned': isPinned,
     };
+  }
+
+  factory Note.fromMap(Map<String, dynamic> map) {
+    return Note(
+      id: map['id'],
+      title: map['title'],
+      note: map['note'],
+      time: map['time'],
+      isPinned: map['isPinned'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Note.fromJson(String source) => Note.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'Note(id: $id, title: $title, note: $note, time: $time, isPinned: $isPinned)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Note &&
+        other.id == id &&
+        other.title == title &&
+        other.note == note &&
+        other.time == time &&
+        other.isPinned == isPinned;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        title.hashCode ^
+        note.hashCode ^
+        time.hashCode ^
+        isPinned.hashCode;
   }
 }
