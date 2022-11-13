@@ -37,7 +37,6 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
     super.build(context);
     searching = widget.isCurrent && widget.searchText.isNotEmpty;
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () async {
@@ -61,8 +60,6 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
             }
           }
         },
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
         child: const Icon(
           Icons.add,
           size: 30,
@@ -77,10 +74,10 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
               search();
             }
             return todos.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      "Add a todo",
-                      style: TextStyle(color: Colors.grey),
+                      searching ? "No match found" : "Add a todo",
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   )
                 : ListView.builder(
@@ -102,14 +99,18 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
     bool checked = todo.isChecked!;
     TextStyle style = TextStyle(
         fontSize: 18,
-        color: checked ? Colors.grey : Colors.white,
+        color: checked
+            ? Colors.grey
+            : Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : null,
         decoration: checked ? TextDecoration.lineThrough : TextDecoration.none);
     return Container(
       margin: const EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
       child: Row(
         children: [
           Checkbox(
-              activeColor: Colors.redAccent,
+              activeColor: Theme.of(context).colorScheme.primary,
               value: checked,
               onChanged: (bool? check) {
                 setState(() {

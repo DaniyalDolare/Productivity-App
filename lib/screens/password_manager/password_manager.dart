@@ -13,10 +13,8 @@ class _PasswordManagerState extends State<PasswordManager> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black12,
-        iconTheme: const IconThemeData(color: Colors.grey),
+        elevation: 0,
       ),
-      backgroundColor: Colors.grey[900],
       body: InkWell(
         onTap: () {
           Navigator.pop(context);
@@ -78,9 +76,8 @@ class _AddPasswordState extends State<AddPassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black12,
+        elevation: 0,
       ),
-      backgroundColor: Colors.grey[900],
       body: Container(
         padding: const EdgeInsets.all(10.0),
         child: Column(

@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth.dart';
-import '../auth/login.dart';
+import 'package:productivity_app/provider/theme_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -15,47 +16,53 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black12,
-        iconTheme: const IconThemeData(color: Colors.grey),
+        title: const Text("Settings"),
+        elevation: 0,
       ),
-      backgroundColor: Colors.grey[900],
-      body: Align(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(user!.photoURL.toString()),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Theme mode:",
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                DropdownButton<ThemeMode>(
+                  underline: const SizedBox.shrink(),
+                  value: themeProvider.userTheme,
+                  items: const [
+                    DropdownMenuItem(
+                      value: ThemeMode.system,
+                      child: Text("System Default"),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.light,
+                      child: Text("Light"),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.dark,
+                      child: Text("Dark"),
+                    ),
+                  ],
+                  onChanged: (value) async {
+                    if (value != null) {
+                      themeProvider.setThemeMode(value);
+                      final pref = await SharedPreferences.getInstance();
+                      pref.setInt("user_theme", value.index);
+                      setState(() {});
+                    }
+                  },
+                ),
+              ],
             ),
-            const Padding(padding: EdgeInsets.all(10)),
-            Text(
-              user!.displayName!,
-              style: const TextStyle(fontSize: 25),
-            ),
-            const Padding(padding: EdgeInsets.all(10)),
-            Text(
-              user!.email!,
-            ),
-            const Padding(padding: EdgeInsets.all(10)),
-            TextButton(
-              onPressed: () {
-                AuthService.signOutGoogle();
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                    (route) => false);
-              },
-              style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40)),
-                  primary: Colors.white,
-                  backgroundColor: Colors.redAccent),
-              child: const Text("Logout"),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

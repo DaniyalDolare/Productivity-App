@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../models/note.dart';
 
 class AddNote extends StatefulWidget {
@@ -60,7 +59,8 @@ class _AddNoteState extends State<AddNote> {
                 IconButton(
                   icon: Icon(
                     Icons.pin_drop,
-                    color: pinned! ? Colors.redAccent : Colors.grey,
+                    color:
+                        pinned! ? Theme.of(context).colorScheme.primary : null,
                   ),
                   onPressed: () {
                     pinned = !pinned!;
@@ -76,18 +76,17 @@ class _AddNoteState extends State<AddNote> {
               ],
             ),
           ],
-          backgroundColor: Colors.black12,
-          iconTheme: const IconThemeData(color: Colors.grey),
+          elevation: 0,
         ),
-        backgroundColor: Colors.grey[900],
         body: Container(
           padding: const EdgeInsets.all(5.0),
           child: Column(
             children: [
               TextField(
                 controller: titleController,
-                cursorColor: Colors.red[200],
-                style: const TextStyle(fontSize: 25),
+                keyboardType: TextInputType.text,
+                style:
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
                 textCapitalization: TextCapitalization.sentences,
                 maxLines: null,
                 decoration: const InputDecoration(
@@ -100,7 +99,6 @@ class _AddNoteState extends State<AddNote> {
               Expanded(
                 child: TextField(
                   controller: noteController,
-                  cursorColor: Colors.red[200],
                   textCapitalization: TextCapitalization.sentences,
                   maxLines: null,
                   decoration: const InputDecoration(

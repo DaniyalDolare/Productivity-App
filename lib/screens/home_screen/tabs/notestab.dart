@@ -38,10 +38,7 @@ class _NotesTabState extends State<NotesTab>
     super.build(context);
     searching = widget.isCurrent && widget.searchText.isNotEmpty;
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
         onPressed: () async {
           Map<String, dynamic>? result = await Navigator.push(
               context,
@@ -185,7 +182,7 @@ class _NotesTabState extends State<NotesTab>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          splashColor: Colors.redAccent,
+          splashColor: Theme.of(context).colorScheme.primary,
           onTap: () async {
             Map<String, dynamic>? result = await Navigator.push(
                 context,
@@ -207,14 +204,18 @@ class _NotesTabState extends State<NotesTab>
               children: [
                 Text(
                   note.title!,
-                  style: const TextStyle(fontSize: 21.0),
+                  style: const TextStyle(
+                      fontSize: 21.0, fontWeight: FontWeight.w500),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const Padding(padding: EdgeInsets.all(4.0)),
                 Text(
                   note.note!,
-                  style: TextStyle(color: Colors.grey[300]),
+                  style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.grey[800]
+                          : Colors.grey[400]),
                   maxLines: 12,
                   overflow: TextOverflow.ellipsis,
                 ),
