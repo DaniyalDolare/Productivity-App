@@ -105,80 +105,82 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
       ),
       drawer: SafeArea(
         child: Drawer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                color: Theme.of(context).colorScheme.secondary,
-                padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.logout,
-                            color: Colors.white,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  color: Theme.of(context).colorScheme.secondary,
+                  padding: const EdgeInsets.only(left: 10.0, bottom: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.logout,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              AuthService.signOutGoogle();
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const LoginPage()),
+                                  (route) => false);
+                            },
+                          )),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 40,
+                            backgroundImage:
+                                NetworkImage(user!.photoURL.toString()),
                           ),
-                          onPressed: () {
-                            AuthService.signOutGoogle();
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginPage()),
-                                (route) => false);
-                          },
-                        )),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 40,
-                          backgroundImage:
-                              NetworkImage(user!.photoURL.toString()),
-                        ),
-                        const Padding(padding: EdgeInsets.all(10)),
-                        Text(
-                          user!.displayName!,
-                          style: const TextStyle(
-                              fontSize: 25, color: Colors.white),
-                        ),
-                        const Padding(padding: EdgeInsets.all(5)),
-                        Text(
-                          user!.email!,
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const Padding(padding: EdgeInsets.all(10)),
+                          Text(
+                            user!.displayName!,
+                            style: const TextStyle(
+                                fontSize: 25, color: Colors.white),
+                          ),
+                          const Padding(padding: EdgeInsets.all(5)),
+                          Text(
+                            user!.email!,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.security),
-                title: const Text("Password Manager"),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const PasswordManager()));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text("Settings"),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Settings()));
-                },
-              )
-            ],
+                ListTile(
+                  leading: const Icon(Icons.security),
+                  title: const Text("Password Manager"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PasswordManager()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text("Settings"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Settings()));
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

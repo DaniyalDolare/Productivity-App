@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/note.dart';
 
-class AddNote extends StatefulWidget {
+class NotePage extends StatefulWidget {
   final Note note;
-  const AddNote({Key? key, required this.note}) : super(key: key);
+  const NotePage({Key? key, required this.note}) : super(key: key);
   @override
-  State<AddNote> createState() => _AddNoteState();
+  State<NotePage> createState() => _NotePageState();
 }
 
-class _AddNoteState extends State<AddNote> {
+class _NotePageState extends State<NotePage> {
   TextEditingController? titleController;
   TextEditingController? noteController;
   bool? pinned;
@@ -78,26 +78,27 @@ class _AddNoteState extends State<AddNote> {
           ],
           elevation: 0,
         ),
-        body: Container(
-          padding: const EdgeInsets.all(5.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: titleController,
-                keyboardType: TextInputType.text,
-                style:
-                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-                textCapitalization: TextCapitalization.sentences,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Title",
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.only(left: 10),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(
+                      fontSize: 25, fontWeight: FontWeight.w500),
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Title",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(left: 10),
+                  ),
                 ),
-              ),
-              const Padding(padding: EdgeInsets.all(4.0)),
-              Expanded(
-                child: TextField(
+                const Padding(padding: EdgeInsets.all(4.0)),
+                TextField(
                   controller: noteController,
                   textCapitalization: TextCapitalization.sentences,
                   maxLines: null,
@@ -107,8 +108,8 @@ class _AddNoteState extends State<AddNote> {
                     contentPadding: EdgeInsets.only(left: 10),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

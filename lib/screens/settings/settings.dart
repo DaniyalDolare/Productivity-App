@@ -22,47 +22,49 @@ class _SettingsState extends State<Settings> {
         title: const Text("Settings"),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Theme mode:",
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                DropdownButton<ThemeMode>(
-                  underline: const SizedBox.shrink(),
-                  value: themeProvider.userTheme,
-                  items: const [
-                    DropdownMenuItem(
-                      value: ThemeMode.system,
-                      child: Text("System Default"),
-                    ),
-                    DropdownMenuItem(
-                      value: ThemeMode.light,
-                      child: Text("Light"),
-                    ),
-                    DropdownMenuItem(
-                      value: ThemeMode.dark,
-                      child: Text("Dark"),
-                    ),
-                  ],
-                  onChanged: (value) async {
-                    if (value != null) {
-                      themeProvider.setThemeMode(value);
-                      final pref = await SharedPreferences.getInstance();
-                      pref.setInt("user_theme", value.index);
-                      setState(() {});
-                    }
-                  },
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Theme mode:",
+                    style: TextStyle(fontSize: 18.0),
+                  ),
+                  DropdownButton<ThemeMode>(
+                    underline: const SizedBox.shrink(),
+                    value: themeProvider.userTheme,
+                    items: const [
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text("System Default"),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text("Light"),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text("Dark"),
+                      ),
+                    ],
+                    onChanged: (value) async {
+                      if (value != null) {
+                        themeProvider.setThemeMode(value);
+                        final pref = await SharedPreferences.getInstance();
+                        pref.setInt("user_theme", value.index);
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

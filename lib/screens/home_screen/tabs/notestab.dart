@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:productivity_app/screens/note/note_page.dart';
 import '../../../services/database.dart';
 import '../../../models/note.dart';
-import '../../add note/addnote.dart';
 
 class NotesTab extends StatefulWidget {
   final String searchText;
@@ -43,7 +43,7 @@ class _NotesTabState extends State<NotesTab>
           Map<String, dynamic>? result = await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => AddNote(
+                  builder: (context) => NotePage(
                         note: Note(),
                       )));
           if (result != null) {
@@ -187,7 +187,7 @@ class _NotesTabState extends State<NotesTab>
             Map<String, dynamic>? result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AddNote(
+                    builder: (context) => NotePage(
                           note: note,
                         )));
             _updateNote(result, note, index);

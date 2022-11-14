@@ -3,7 +3,7 @@ import 'package:productivity_app/services/notification.dart';
 import '../../../models/reminder.dart';
 import '../../../models/todo.dart';
 import '../../../services/database.dart';
-import '../../add todo/addtodo.dart';
+import '../../todo/todo_page.dart';
 
 class TodoTab extends StatefulWidget {
   final String searchText;
@@ -41,7 +41,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
         heroTag: null,
         onPressed: () async {
           Map<String, dynamic>? result = await Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddTodo()));
+              MaterialPageRoute(builder: (context) => const TodoPage()));
           if (result != null) {
             if (result["title"] != '') {
               //if todo title is not empty then create todo
