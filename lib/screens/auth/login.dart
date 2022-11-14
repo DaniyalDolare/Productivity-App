@@ -43,6 +43,10 @@ class _LoginPageState extends State<LoginPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const Tabs()));
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
                         }
                         return user;
                       }, onError: (Object error) {

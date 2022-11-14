@@ -118,12 +118,13 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
                       Align(
                           alignment: Alignment.centerRight,
                           child: IconButton(
+                            tooltip: "Sign out",
                             icon: const Icon(
                               Icons.logout,
                               color: Colors.white,
                             ),
-                            onPressed: () {
-                              AuthService.signOutGoogle();
+                            onPressed: () async {
+                              await AuthService.signOutGoogle();
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(

@@ -12,7 +12,6 @@ class AuthService {
     if (kIsWeb) {
       // The `GoogleAuthProvider` can only be used while running on the web
       GoogleAuthProvider authProvider = GoogleAuthProvider();
-
       try {
         final UserCredential userCredential =
             await _auth.signInWithPopup(authProvider);
@@ -20,7 +19,7 @@ class AuthService {
         return userCredential.user;
       } catch (e) {
         debugPrint('error on web signin: $e');
-        return null;
+        rethrow;
       }
     } else {
       final GoogleSignInAccount? googleSignInAccount =
@@ -49,7 +48,9 @@ class AuthService {
   }
 
   static Future<void> signOutGoogle() async {
-    await _googleSignIn.signOut();
+    if (!kIsWeb) {
+      await _googleSignIn.signOut();
+    }
     await _auth.signOut();
   }
 }
