@@ -37,9 +37,6 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading,
-        backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.grey[100]
-            : Colors.black12,
         title: searching
             ? Padding(
                 padding: const EdgeInsets.all(8.0),

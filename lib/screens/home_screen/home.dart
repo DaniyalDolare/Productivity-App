@@ -15,26 +15,29 @@ class Home extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         themeMode: provider.userTheme,
         theme: ThemeData(
-          appBarTheme: AppBarTheme(backgroundColor: Colors.grey[100]),
+          colorSchemeSeed: Colors.redAccent,
+          appBarTheme: AppBarTheme(
+              foregroundColor: Colors.black, backgroundColor: Colors.grey[100]),
           brightness: Brightness.light,
-          colorScheme: const ColorScheme.light(
-            primary: Colors.redAccent,
-            secondary: Colors.redAccent,
-            onPrimary: Colors.black,
-            onSecondary: Colors.white,
-            onSurface: Colors.black,
-          ),
+          // colorScheme: const ColorScheme.light(
+          //   primary: Colors.redAccent,
+          //   secondary: Colors.redAccent,
+          //   onPrimary: Colors.black,
+          //   onSecondary: Colors.white,
+          //   onSurface: Colors.black,
+          // ),
         ),
         darkTheme: ThemeData(
+          colorSchemeSeed: Colors.redAccent,
           appBarTheme: const AppBarTheme(backgroundColor: Colors.black12),
           brightness: Brightness.dark,
-          colorScheme: const ColorScheme.dark(
-            primary: Colors.redAccent,
-            secondary: Colors.redAccent,
-            onPrimary: Colors.white,
-            onSecondary: Colors.white,
-            onSurface: Colors.white,
-          ),
+          // colorScheme: const ColorScheme.dark(
+          //   primary: Colors.redAccent,
+          //   secondary: Colors.redAccent,
+          //   onPrimary: Colors.white,
+          //   onSecondary: Colors.white,
+          //   onSurface: Colors.white,
+          // ),
         ),
         home: StreamBuilder<User?>(
           stream: userState,
