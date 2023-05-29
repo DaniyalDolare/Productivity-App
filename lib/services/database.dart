@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../models/note.dart';
-import '../models/todo.dart';
+import 'package:productivity_app/models/note.dart';
+import 'package:productivity_app/models/todo.dart';
 
 class DatabaseService {
   DatabaseService._();
@@ -11,47 +11,34 @@ class DatabaseService {
 
   static Future<String> saveNote(Note note) async {
     final User user = FirebaseAuth.instance.currentUser!;
-    var docReference = firestore
-        .collection(user.uid)
-        .doc('data')
-        .collection('notes')
-        .add(note.toMap()..remove("id"));
-
-    return docReference.then((value) => value.id);
+    var docReference =
+        firestore.collection(user.uid).doc('data').collection('notes').doc();
+    docReference.set(note.toMap()
+      ..remove("id")
+      ..addAll({"time": FieldValue.serverTimestamp()}));
+    return docReference.id;
   }
 
-  static Future<List<Note>> getNotes() async {
+  static Stream<List<Note>> getNotes() {
     final User user = FirebaseAuth.instance.currentUser!;
-    QuerySnapshot dataSnapshot = await firestore
+    return firestore
         .collection(user.uid)
         .doc('data')
         .collection('notes')
+        .orderBy('isPinned', descending: true)
         .orderBy('time', descending: true)
-        .get(const GetOptions(source: Source.serverAndCache));
-
-    List<Note> notes = [];
-    List<Note> fetchedNotes = [];
-
-    if (dataSnapshot.docs.isNotEmpty) {
-      for (QueryDocumentSnapshot values in dataSnapshot.docs) {
-        final id = values.id;
-        final data = values.data() as Map<String, dynamic>;
-        Note note = Note.fromMap(data);
-        note.setId(id.toString());
-        fetchedNotes.add(note);
-      }
-
-      List<Note> pinnedNotes = [];
-      for (Note note in fetchedNotes) {
-        if (note.isPinned == true) {
-          pinnedNotes.add(note);
-        } else {
-          notes.add(note);
-        }
-      }
-      notes.insertAll(0, pinnedNotes);
-    }
-    return notes;
+        .snapshots()
+        .map<List<Note>>((event) => event.docs.map((e) {
+              final data = e.data();
+              data.update("time", (value) {
+                if (value is Timestamp) {
+                  return value.toDate();
+                } else {
+                  return DateTime.parse(value);
+                }
+              });
+              return Note.fromMap(data..addAll({"id": e.id}));
+            }).toList());
   }
 
   static Future<void> updateNote(Note note) async {
@@ -61,7 +48,9 @@ class DatabaseService {
         .doc('data')
         .collection('notes')
         .doc(note.id)
-        .update(note.toMap()..remove("id"))
+        .update(note.toMap()
+          ..remove("id")
+          ..addAll({"time": FieldValue.serverTimestamp()}))
         .catchError((error) => debugPrint('this is the error: $error'));
   }
 
@@ -83,10 +72,9 @@ class DatabaseService {
         .collection(user.uid)
         .doc('data')
         .collection('todos')
-        .add(todo.toMap()..remove("id"))
-        .catchError((error) {
-      debugPrint('this is the error: $error');
-    });
+        .add(todo.toMap()
+          ..remove("id")
+          ..addAll({"time": FieldValue.serverTimestamp()}));
     return id.then((value) => value.id);
   }
 
@@ -97,7 +85,9 @@ class DatabaseService {
         .doc('data')
         .collection('todos')
         .doc(todo.id)
-        .update(todo.toMap()..remove("id"))
+        .update(todo.toMap()
+          ..remove("id")
+          ..addAll({"time": FieldValue.serverTimestamp()}))
         .catchError((error) => debugPrint('this is the error: $error'));
   }
 
@@ -112,29 +102,25 @@ class DatabaseService {
         .catchError((error) => debugPrint('this is the error: $error'));
   }
 
-  static Future<List<Todo>> getTodos() async {
+  static Stream<List<Todo>> getTodos() {
     final User user = FirebaseAuth.instance.currentUser!;
-    QuerySnapshot querySnapshot = await firestore
+    return firestore
         .collection(user.uid)
         .doc('data')
         .collection('todos')
         .orderBy('isChecked')
         .orderBy('time', descending: true)
-        .get(const GetOptions(source: Source.serverAndCache));
-
-    List<Todo> todos = [];
-
-    if (querySnapshot.docs.isNotEmpty) {
-      for (QueryDocumentSnapshot values in querySnapshot.docs) {
-        var id = values.id;
-        var data = values.data() as Map<String, dynamic>;
-        Todo todo = Todo.fromMap(data);
-        todo.id = id.toString();
-        todos.add(todo);
-      }
-    } else {
-      debugPrint('no data');
-    }
-    return todos;
+        .snapshots()
+        .map<List<Todo>>((event) => event.docs.map((e) {
+              final data = e.data();
+              data.update("time", (value) {
+                if (value is Timestamp) {
+                  return value.toDate();
+                } else {
+                  return DateTime.parse(value);
+                }
+              });
+              return Todo.fromMap(data..addAll({"id": e.id}));
+            }).toList());
   }
 }

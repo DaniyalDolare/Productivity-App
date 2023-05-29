@@ -6,7 +6,7 @@ class Todo {
   String? id;
   String? title;
   bool? isChecked;
-  String? time;
+  DateTime? time;
   Reminder? reminder;
   String? data;
   List<Todo>? subTodo;
@@ -29,7 +29,7 @@ class Todo {
     String? id,
     String? title,
     bool? isChecked,
-    String? time,
+    DateTime? time,
     Reminder? reminder,
     String? data,
     List<Todo>? subTodo,

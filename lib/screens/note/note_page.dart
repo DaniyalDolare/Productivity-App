@@ -35,7 +35,7 @@ class _NotePageState extends State<NotePage> {
         Navigator.pop(context, {
           "title": titleController!.text,
           "note": noteController!.text,
-          "time": DateTime.now().toString(),
+          "time": DateTime.now(),
           "isPinned": pinned
         });
         return true;
@@ -48,7 +48,7 @@ class _NotePageState extends State<NotePage> {
               Navigator.pop(context, {
                 "title": titleController!.text,
                 "note": noteController!.text,
-                "time": DateTime.now().toString(),
+                "time": DateTime.now(),
                 "isPinned": pinned
               });
             },

@@ -107,7 +107,7 @@ class _TodoPageState extends State<TodoPage> {
   void _popScreen(BuildContext context) {
     Navigator.pop(context, {
       "title": titleController.text,
-      "time": DateTime.now().toString(),
+      "time": DateTime.now(),
       "reminder": reminder,
     });
   }

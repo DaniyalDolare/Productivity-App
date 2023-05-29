@@ -4,7 +4,7 @@ class Note {
   String? id;
   String? title;
   String? note;
-  String? time;
+  DateTime? time;
   bool? isPinned = false;
 
   Note({
@@ -23,7 +23,7 @@ class Note {
     String? id,
     String? title,
     String? note,
-    String? time,
+    DateTime? time,
     bool? isPinned,
   }) {
     return Note(

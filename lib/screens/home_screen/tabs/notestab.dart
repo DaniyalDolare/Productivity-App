@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:productivity_app/models/note.dart';
 import 'package:productivity_app/screens/note/note_page.dart';
-import '../../../services/database.dart';
-import '../../../models/note.dart';
+import 'package:productivity_app/services/database.dart';
 
 class NotesTab extends StatefulWidget {
   final String searchText;
@@ -15,7 +15,7 @@ class NotesTab extends StatefulWidget {
 
 class _NotesTabState extends State<NotesTab>
     with AutomaticKeepAliveClientMixin<NotesTab> {
-  late Future<List<Note>> fetchedNotes;
+  late Stream<List<Note>> fetchedNotes;
   late bool searching;
   List<Note> _notes = [];
   final List<Note> _searchResult = [];
@@ -30,7 +30,6 @@ class _NotesTabState extends State<NotesTab>
     super.initState();
     fetchedNotes = DatabaseService.getNotes();
     searching = widget.isCurrent && widget.searchText.isNotEmpty;
-    // FirebaseDatabase.instance.goOnline();
   }
 
   @override
@@ -39,53 +38,14 @@ class _NotesTabState extends State<NotesTab>
     searching = widget.isCurrent && widget.searchText.isNotEmpty;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          Map<String, dynamic>? result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => NotePage(
-                        note: Note(),
-                      )));
-          if (result != null) {
-            if (result["title"] != '' || result["note"] != '') {
-              //save note to database and get the uid from databse and save uid to note.id
-              Note note = Note(
-                  title: result["title"],
-                  note: result["note"],
-                  time: result["time"],
-                  isPinned: result["isPinned"]);
-              DatabaseService.saveNote(note).then((value) => note.setId(value));
-              //  If current note is pinned, add it to first position
-              if (note.isPinned!) {
-                _notes.insert(0, note);
-              } else {
-                // If current note is not pinned, iterate through notes and find the index
-                // of the first unpinned note
-                int? index;
-                for (var i = 0; i < _notes.length; i++) {
-                  if (!_notes[i].isPinned!) {
-                    index = i;
-                    break;
-                  }
-                }
-                // If index found, add note at that index else add it to the end
-                if (index != null) {
-                  _notes.insert(index, note);
-                } else {
-                  _notes.add(note);
-                }
-              }
-              setState(() {});
-            }
-          }
-        },
+        onPressed: addNote,
         child: const Icon(
           Icons.add,
           size: 30,
         ),
       ),
-      body: FutureBuilder<List<Note>>(
-        future: fetchedNotes,
+      body: StreamBuilder<List<Note>>(
+        stream: fetchedNotes,
         builder: (BuildContext context, AsyncSnapshot<List<Note>> snapshot) {
           if (snapshot.hasData) {
             _notes = snapshot.data!;
@@ -100,23 +60,16 @@ class _NotesTabState extends State<NotesTab>
                     ),
                   )
                 : Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            child: MasonryGridView.count(
-                              itemCount: notes.length,
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 8.0,
-                              crossAxisSpacing: 8.0,
-                              itemBuilder: (context, index) =>
-                                  _drawNoteCard(notes[index], index),
-                            ),
-                          ),
-                        ),
-                      ],
+                    padding: const EdgeInsets.all(8.0),
+                    child: MasonryGridView.count(
+                      itemCount: notes.length,
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
+                      itemBuilder: (context, index) => NoteCard(
+                          note: notes[index],
+                          index: index,
+                          updateNote: _updateNote),
                     ),
                   );
           } else {
@@ -125,6 +78,28 @@ class _NotesTabState extends State<NotesTab>
         },
       ),
     );
+  }
+
+  void addNote() async {
+    Map<String, dynamic>? result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NotePage(
+                  note: Note(),
+                )));
+    if (result != null) {
+      if (result["title"] != '' || result["note"] != '') {
+        //save note to database and get the uid from databse and save uid to note.id
+        Note note = Note(
+            title: result["title"],
+            note: result["note"],
+            time: result["time"],
+            isPinned: result["isPinned"]);
+        DatabaseService.saveNote(note).then((value) {
+          note.setId(value);
+        });
+      }
+    }
   }
 
   void _updateNote(Map<String, dynamic>? result, Note note, int index) async {
@@ -141,42 +116,42 @@ class _NotesTabState extends State<NotesTab>
             ..time = result["time"]
             ..isPinned = result["isPinned"];
           DatabaseService.updateNote(note);
-          if (note.isPinned!) {
-            _notes.removeWhere((element) => element == note);
-            _notes.insert(0, note);
-          } else {
-            _notes.removeWhere((element) => element == note);
-            int? index;
-            for (var i = 0; i < _notes.length; i++) {
-              if (!_notes[i].isPinned!) {
-                index = i;
-                break;
-              }
-            }
-            // If index found, add note at that index else add it to the end
-            if (index != null) {
-              _notes.insert(index, note);
-            } else {
-              _notes.add(note);
-            }
-          }
-          setState(() {});
         }
       } else {
         DatabaseService.deleteNote(note);
-        setState(() {
-          _notes.remove(note);
-        });
       }
     } else {
       DatabaseService.deleteNote(note);
-      setState(() {
-        _notes.remove(note);
-      });
     }
   }
 
-  Widget _drawNoteCard(Note note, int index) {
+  void search() {
+    _searchResult.clear();
+    for (var note in _notes) {
+      if (note.title!.toLowerCase().contains(widget.searchText.toLowerCase())) {
+        _searchResult.add(note);
+      } else if (note.note!
+          .toLowerCase()
+          .contains(widget.searchText.toLowerCase())) {
+        _searchResult.add(note);
+      }
+    }
+  }
+}
+
+class NoteCard extends StatelessWidget {
+  const NoteCard(
+      {super.key,
+      required this.note,
+      required this.index,
+      required this.updateNote});
+
+  final Note note;
+  final int index;
+  final void Function(Map<String, dynamic>?, Note, int) updateNote;
+
+  @override
+  Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
@@ -190,7 +165,7 @@ class _NotesTabState extends State<NotesTab>
                     builder: (context) => NotePage(
                           note: note,
                         )));
-            _updateNote(result, note, index);
+            updateNote(result, note, index);
           },
           child: Container(
             padding: const EdgeInsets.all(10.0),
@@ -225,18 +200,5 @@ class _NotesTabState extends State<NotesTab>
         ),
       ),
     );
-  }
-
-  void search() {
-    _searchResult.clear();
-    for (var note in _notes) {
-      if (note.title!.toLowerCase().contains(widget.searchText.toLowerCase())) {
-        _searchResult.add(note);
-      } else if (note.note!
-          .toLowerCase()
-          .contains(widget.searchText.toLowerCase())) {
-        _searchResult.add(note);
-      }
-    }
   }
 }

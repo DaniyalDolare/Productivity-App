@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:productivity_app/models/reminder.dart';
+import 'package:productivity_app/models/todo.dart';
+import 'package:productivity_app/screens/todo/todo_page.dart';
+import 'package:productivity_app/services/database.dart';
 import 'package:productivity_app/services/notification.dart';
-import '../../../models/reminder.dart';
-import '../../../models/todo.dart';
-import '../../../services/database.dart';
-import '../../todo/todo_page.dart';
 
 class TodoTab extends StatefulWidget {
   final String searchText;
@@ -17,7 +17,7 @@ class TodoTab extends StatefulWidget {
 class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   List<Todo> _todos = [];
   final List<Todo> _searchResult = [];
-  late Future<List<Todo>> getTodos;
+  late Stream<List<Todo>> getTodos;
   late bool searching;
 
   List<Todo> get todos => searching ? _searchResult : _todos;
@@ -39,34 +39,14 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: null,
-        onPressed: () async {
-          Map<String, dynamic>? result = await Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const TodoPage()));
-          if (result != null) {
-            if (result["title"] != '') {
-              //if todo title is not empty then create todo
-              Todo todo = Todo(
-                  title: result["title"],
-                  isChecked: false,
-                  time: result["time"]);
-              if (result["reminder"] != null) {
-                todo.reminder = result["reminder"];
-                todo.reminder!.title = todo.title;
-                addReminder(todo.reminder!);
-              }
-              DatabaseService.saveTodo(todo).then((value) => todo.setId(value));
-              _todos.insert(0, todo);
-              setState(() {});
-            }
-          }
-        },
+        onPressed: addTodo,
         child: const Icon(
           Icons.add,
           size: 30,
         ),
       ),
-      body: FutureBuilder(
-        future: getTodos,
+      body: StreamBuilder(
+        stream: getTodos,
         builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
           if (snapshot.hasData) {
             _todos = snapshot.data!;
@@ -82,8 +62,50 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                   )
                 : ListView.builder(
                     itemCount: todos.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        drawTodo(todos[index], index),
+                    itemBuilder: (BuildContext context, int index) {
+                      final todo = todos[index];
+                      bool checked = todo.isChecked!;
+                      TextStyle style = TextStyle(
+                          fontSize: 18,
+                          color: checked
+                              ? Colors.grey
+                              : Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : null,
+                          decoration: checked
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none);
+                      return Container(
+                        margin: const EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                                activeColor:
+                                    Theme.of(context).colorScheme.primary,
+                                value: checked,
+                                onChanged: (check) => updateTodo(todo, check)),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      todo.title!,
+                                      overflow: TextOverflow.fade,
+                                      style: style,
+                                    ),
+                                  ),
+                                  IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () => deleteTodo(todo))
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
           } else if (snapshot.connectionState == ConnectionState.done) {
             return const Center(child: Text("Connection time out"));
@@ -95,71 +117,50 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Widget drawTodo(Todo todo, int index) {
-    bool checked = todo.isChecked!;
-    TextStyle style = TextStyle(
-        fontSize: 18,
-        color: checked
-            ? Colors.grey
-            : Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : null,
-        decoration: checked ? TextDecoration.lineThrough : TextDecoration.none);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
-      child: Row(
-        children: [
-          Checkbox(
-              activeColor: Theme.of(context).colorScheme.primary,
-              value: checked,
-              onChanged: (bool? check) {
-                setState(() {
-                  checked = check!;
-                  todo.isChecked = check;
-                  DatabaseService.updateTodo(todo);
-                  if (checked) {
-                    _todos.remove(todo);
-                    int checkedIndex =
-                        _todos.indexWhere((todo) => todo.isChecked!);
-                    if (checkedIndex == -1) {
-                      _todos.add(todo);
-                    } else {
-                      _todos.insert(checkedIndex, todo);
-                    }
-                  } else {
-                    _todos.remove(todo);
-                    _todos.insert(0, todo);
-                  }
-                });
-              }),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    todo.title!,
-                    overflow: TextOverflow.fade,
-                    style: style,
-                  ),
-                ),
-                IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      DatabaseService.deleteTodo(todo);
-                      if (todo.reminder != null) {
-                        await LocalNotification.flutterLocalNotificationsPlugin
-                            .cancel(todo.reminder!.date!.microsecond);
-                      }
-                      _todos.remove(todo);
-                      setState(() {});
-                    })
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  void addTodo() async {
+    Map<String, dynamic>? result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const TodoPage()));
+    if (result != null) {
+      if (result["title"] != '') {
+        //if todo title is not empty then create todo
+        Todo todo = Todo(
+            title: result["title"], isChecked: false, time: result["time"]);
+        if (result["reminder"] != null) {
+          todo.reminder = result["reminder"];
+          todo.reminder!.title = todo.title;
+          addReminder(todo.reminder!);
+        }
+        DatabaseService.saveTodo(todo).then((value) => todo.setId(value));
+        _todos.insert(0, todo);
+      }
+    }
+  }
+
+  void deleteTodo(Todo todo) async {
+    DatabaseService.deleteTodo(todo);
+    if (todo.reminder != null) {
+      await LocalNotification.flutterLocalNotificationsPlugin
+          .cancel(todo.reminder!.date!.microsecond);
+    }
+    _todos.remove(todo);
+  }
+
+  void updateTodo(Todo todo, bool? check) {
+    final checked = check!;
+    todo.isChecked = check;
+    DatabaseService.updateTodo(todo);
+    if (checked) {
+      _todos.remove(todo);
+      int checkedIndex = _todos.indexWhere((todo) => todo.isChecked!);
+      if (checkedIndex == -1) {
+        _todos.add(todo);
+      } else {
+        _todos.insert(checkedIndex, todo);
+      }
+    } else {
+      _todos.remove(todo);
+      _todos.insert(0, todo);
+    }
   }
 
   void search() {
@@ -170,20 +171,4 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
       }
     }
   }
-
-  Widget liststs() => CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                (context, index) => const Text("hi"),
-                childCount: 5),
-          ),
-          const Text("THis is seperation"),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                (context, index) => const Text("by"),
-                childCount: 5),
-          ),
-        ],
-      );
 }
