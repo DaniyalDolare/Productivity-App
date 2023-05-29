@@ -1,11 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:productivity_app/firebase_options.dart';
 import 'package:productivity_app/provider/theme_provider.dart';
+import 'package:productivity_app/screens/home_screen/home.dart';
+import 'package:productivity_app/services/notification.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'services/notification.dart';
-import 'firebase_options.dart';
-import 'screens/home_screen/home.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

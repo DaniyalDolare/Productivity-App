@@ -96,7 +96,7 @@ Future<void> addReminder(Reminder reminder) async {
       reminder.title,
       scheduledDate,
       notificationDetails,
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime);
 }

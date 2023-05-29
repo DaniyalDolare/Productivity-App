@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:productivity_app/provider/theme_provider.dart';
+import 'package:productivity_app/screens/auth/login.dart';
+import 'package:productivity_app/screens/home_screen/tabs.dart';
 import 'package:provider/provider.dart';
-import '../auth/login.dart';
-import 'tabs.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,29 +15,31 @@ class Home extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         themeMode: provider.userTheme,
         theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(
+                allowEnterRouteSnapshotting: false,
+              ),
+            },
+          ),
+          useMaterial3: true,
           colorSchemeSeed: Colors.redAccent,
           appBarTheme: AppBarTheme(
               foregroundColor: Colors.black, backgroundColor: Colors.grey[100]),
           brightness: Brightness.light,
-          // colorScheme: const ColorScheme.light(
-          //   primary: Colors.redAccent,
-          //   secondary: Colors.redAccent,
-          //   onPrimary: Colors.black,
-          //   onSecondary: Colors.white,
-          //   onSurface: Colors.black,
-          // ),
         ),
         darkTheme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(
+                allowEnterRouteSnapshotting: false,
+              ),
+            },
+          ),
+          useMaterial3: true,
           colorSchemeSeed: Colors.redAccent,
           appBarTheme: const AppBarTheme(backgroundColor: Colors.black12),
           brightness: Brightness.dark,
-          // colorScheme: const ColorScheme.dark(
-          //   primary: Colors.redAccent,
-          //   secondary: Colors.redAccent,
-          //   onPrimary: Colors.white,
-          //   onSecondary: Colors.white,
-          //   onSurface: Colors.white,
-          // ),
         ),
         home: StreamBuilder<User?>(
           stream: userState,
