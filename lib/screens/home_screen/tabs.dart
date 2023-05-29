@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../password_manager/password_manager.dart';
-import '../../services/auth.dart';
-import '../auth/login.dart';
-import '../settings/settings.dart';
+import 'package:productivity_app/screens/auth/login.dart';
+import 'package:productivity_app/screens/home_screen/tabs/habitstab.dart';
+import 'package:productivity_app/screens/password_manager/password_manager.dart';
+import 'package:productivity_app/screens/settings/settings.dart';
+import 'package:productivity_app/services/auth.dart';
+
 import 'tabs/notestab.dart';
 import 'tabs/todotab.dart';
 
@@ -16,7 +18,7 @@ class Tabs extends StatefulWidget {
 
 class _TabsState extends State<Tabs> with TickerProviderStateMixin {
   late TabController tabController;
-  List<String> tabs = ["Notes", "Todos"];
+  List<String> tabs = ["Notes", "Todos", "Habits"];
   User? user = FirebaseAuth.instance.currentUser;
   bool searching = false, automaticallyImplyLeading = true;
   FocusNode searchFocusNode = FocusNode();
@@ -72,30 +74,36 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
         bottom: searching
             ? null
             : TabBar(
+                dividerColor: Colors.transparent,
                 controller: tabController,
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.grey,
                 indicatorSize: TabBarIndicatorSize.tab,
                 splashBorderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20)),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
                 indicator: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20)),
-                    color: Theme.of(context).scaffoldBackgroundColor),
-                tabs: [
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                tabs: const [
                   Tab(
                     child: Center(
-                      child: Column(
-                          children: const [Icon(Icons.note), Text("Notes")]),
+                      child:
+                          Column(children: [Icon(Icons.note), Text("Notes")]),
                     ),
                   ),
                   Tab(
                     child: Center(
+                        child:
+                            Column(children: [Icon(Icons.list), Text("TODO")])),
+                  ),
+                  Tab(
+                    child: Center(
                         child: Column(
-                            children: const [Icon(Icons.list), Text("TODO")])),
+                            children: [Icon(Icons.list), Text("Habits")])),
                   ),
                 ],
               ),
@@ -193,6 +201,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
             isCurrent: tabController.index == 1,
             searchText: searchText,
           ),
+          const HabitsTab(),
         ],
       ),
     );
