@@ -8,8 +8,7 @@ import 'package:productivity_app/services/notification.dart';
 class TodoTab extends StatefulWidget {
   final String searchText;
   final bool isCurrent;
-  const TodoTab({Key? key, required this.searchText, required this.isCurrent})
-      : super(key: key);
+  const TodoTab({super.key, required this.searchText, required this.isCurrent});
   @override
   State<TodoTab> createState() => _TodoTabState();
 }
@@ -107,6 +106,13 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
                       );
                     },
                   );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                "Something went wrong, please try again",
+                style: TextStyle(color: Colors.grey),
+              ),
+            );
           } else if (snapshot.connectionState == ConnectionState.done) {
             return const Center(child: Text("Connection time out"));
           } else {

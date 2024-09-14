@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as t;
 import 'package:timezone/timezone.dart' as tz;
 import '../services/notification.dart';
@@ -66,7 +66,7 @@ Future<void> addReminder(Reminder reminder) async {
   t.initializeTimeZones();
 
   //get current local timezone name
-  final String currentTimeZone = await FlutterNativeTimezone.getLocalTimezone();
+  final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
 
   //get timezone location
   final location = tz.getLocation(currentTimeZone);
@@ -75,10 +75,8 @@ Future<void> addReminder(Reminder reminder) async {
   final scheduledDate = tz.TZDateTime.from(dateTime, location);
 
   var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-      'com.example.productivity_app/reminder', 'reminder',
+      'com.daniyal.productivity_app/reminder', 'reminder',
       channelDescription: 'Channel for reminder notification',
-      icon: 'app_icon',
-      largeIcon: DrawableResourceAndroidBitmap('app_icon'),
       importance: Importance.high,
       priority: Priority.high);
 
@@ -96,7 +94,7 @@ Future<void> addReminder(Reminder reminder) async {
       reminder.title,
       scheduledDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime);
 }

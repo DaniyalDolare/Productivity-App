@@ -5,7 +5,7 @@ import 'package:productivity_app/services/database.dart';
 import 'package:productivity_app/utils/extensions.dart';
 
 class HabitsTab extends StatefulWidget {
-  const HabitsTab({Key? key}) : super(key: key);
+  const HabitsTab({super.key});
 
   @override
   State<HabitsTab> createState() => _HabitsTabState();

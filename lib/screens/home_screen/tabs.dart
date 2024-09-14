@@ -10,7 +10,7 @@ import 'tabs/notestab.dart';
 import 'tabs/todotab.dart';
 
 class Tabs extends StatefulWidget {
-  const Tabs({Key? key}) : super(key: key);
+  const Tabs({super.key});
 
   @override
   State<Tabs> createState() => _TabsState();
@@ -163,16 +163,19 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.security),
-                  title: const Text("Password Manager"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PasswordManager()));
-                  },
+                Visibility(
+                  visible: false, // TODO: Deactivate password manager
+                  child: ListTile(
+                    leading: const Icon(Icons.security),
+                    title: const Text("Password Manager"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const PasswordManager()));
+                    },
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),

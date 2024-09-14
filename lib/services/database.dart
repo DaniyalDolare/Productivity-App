@@ -15,9 +15,9 @@ class DatabaseService {
     final User user = FirebaseAuth.instance.currentUser!;
     var docReference =
         firestore.collection(user.uid).doc('data').collection('notes').doc();
-    docReference.set(note.toMap()
+    await docReference.set(note.toMap()
       ..remove("id")
-      ..addAll({"time": FieldValue.serverTimestamp()}));
+      ..addAll({"time": Timestamp.fromDate(note.time ?? DateTime.now())}));
     return docReference.id;
   }
 
@@ -52,7 +52,7 @@ class DatabaseService {
         .doc(note.id)
         .update(note.toMap()
           ..remove("id")
-          ..addAll({"time": FieldValue.serverTimestamp()}))
+          ..addAll({"time": Timestamp.fromDate(note.time ?? DateTime.now())}))
         .catchError((error) => debugPrint('this is the error: $error'));
   }
 
@@ -76,7 +76,7 @@ class DatabaseService {
         .collection('todos')
         .add(todo.toMap()
           ..remove("id")
-          ..addAll({"time": FieldValue.serverTimestamp()}));
+          ..addAll({"time": Timestamp.fromDate(todo.time ?? DateTime.now())}));
     return id.then((value) => value.id);
   }
 
@@ -89,7 +89,7 @@ class DatabaseService {
         .doc(todo.id)
         .update(todo.toMap()
           ..remove("id")
-          ..addAll({"time": FieldValue.serverTimestamp()}))
+          ..addAll({"time": Timestamp.fromDate(todo.time ?? DateTime.now())}))
         .catchError((error) => debugPrint('this is the error: $error'));
   }
 
@@ -196,7 +196,7 @@ class DatabaseService {
 
     final latestHistoryRef = habitReference.collection("history").doc();
     await latestHistoryRef
-        .set({"time": FieldValue.serverTimestamp(), "note": note});
+        .set({"time": Timestamp.fromDate(DateTime.now()), "note": note});
     await latestHistoryRef.get().then((value) async {
       final historyData = value.data()?..addAll({"id": latestHistoryRef.id});
       await habitReference.update({

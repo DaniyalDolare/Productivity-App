@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/reminder.dart';
 
 class TodoPage extends StatefulWidget {
-  const TodoPage({Key? key}) : super(key: key);
+  const TodoPage({super.key});
 
   @override
   State<TodoPage> createState() => _TodoPageState();
@@ -22,10 +22,13 @@ class _TodoPageState extends State<TodoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
         _popScreen(context);
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -130,7 +133,7 @@ class _AddReminderDailogState extends State<AddReminderDailog> {
   DateTime date = DateTime.now();
   final weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   final days = List.generate(31, (index) => index + 1);
-  bool doNotRepeat = false;
+  bool doNotRepeat = true;
   String repeat = "Weekly";
   String until = "Forever";
   String monthlyRepeatFor = "Same Day";
@@ -206,18 +209,21 @@ class _AddReminderDailogState extends State<AddReminderDailog> {
                     initialText: "Date",
                     controller: dateController,
                     icon: Icons.calendar_today),
-                Row(
-                  children: [
-                    Checkbox(
-                        activeColor: Theme.of(context).colorScheme.primary,
-                        value: doNotRepeat,
-                        onChanged: (value) {
-                          setState(() {
-                            doNotRepeat = value!;
-                          });
-                        }),
-                    const Text("Do not repeat"),
-                  ],
+                Visibility(
+                  visible: false, // TODO: Deactivate repeatitive reminder
+                  child: Row(
+                    children: [
+                      Checkbox(
+                          activeColor: Theme.of(context).colorScheme.primary,
+                          value: doNotRepeat,
+                          onChanged: (value) {
+                            setState(() {
+                              doNotRepeat = value!;
+                            });
+                          }),
+                      const Text("Do not repeat"),
+                    ],
+                  ),
                 ),
                 if (!doNotRepeat) ...[
                   DropdownButtonFormField<String>(
@@ -424,12 +430,12 @@ class _AddReminderDailogState extends State<AddReminderDailog> {
 
 class TimeDateField extends StatelessWidget {
   const TimeDateField({
-    Key? key,
+    super.key,
     this.onTap,
     this.initialText,
     this.controller,
     this.icon,
-  }) : super(key: key);
+  });
 
   final void Function()? onTap;
   final String? initialText;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PasswordManager extends StatefulWidget {
-  const PasswordManager({Key? key}) : super(key: key);
+  const PasswordManager({super.key});
 
   @override
   State<PasswordManager> createState() => _PasswordManagerState();
@@ -29,11 +29,11 @@ class _PasswordManagerState extends State<PasswordManager> {
               const SizedBox(
                 width: 15.0,
               ),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Text("Facebook"),
                     Text(
                       "Daniyal",
@@ -65,7 +65,7 @@ class _PasswordManagerState extends State<PasswordManager> {
 }
 
 class AddPassword extends StatefulWidget {
-  const AddPassword({Key? key}) : super(key: key);
+  const AddPassword({super.key});
 
   @override
   State<AddPassword> createState() => _AddPasswordState();

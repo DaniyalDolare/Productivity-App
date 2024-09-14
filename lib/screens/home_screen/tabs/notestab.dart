@@ -7,8 +7,8 @@ import 'package:productivity_app/services/database.dart';
 class NotesTab extends StatefulWidget {
   final String searchText;
   final bool isCurrent;
-  const NotesTab({Key? key, required this.searchText, required this.isCurrent})
-      : super(key: key);
+  const NotesTab(
+      {super.key, required this.searchText, required this.isCurrent});
   @override
   State<NotesTab> createState() => _NotesTabState();
 }
@@ -72,6 +72,13 @@ class _NotesTabState extends State<NotesTab>
                           updateNote: _updateNote),
                     ),
                   );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                "Something went wrong, please try again",
+                style: TextStyle(color: Colors.grey),
+              ),
+            );
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -152,49 +159,52 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          splashColor: Theme.of(context).colorScheme.primary,
-          onTap: () async {
-            Map<String, dynamic>? result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NotePage(
-                          note: note,
-                        )));
-            updateNote(result, note, index);
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  note.title!,
-                  style: const TextStyle(
-                      fontSize: 21.0, fontWeight: FontWeight.w500),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Padding(padding: EdgeInsets.all(4.0)),
-                Text(
-                  note.note!,
-                  style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.grey[800]
-                          : Colors.grey[400]),
-                  maxLines: 12,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+    return Hero(
+      tag: "note${note.id}",
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            splashColor: Theme.of(context).colorScheme.primary,
+            onTap: () async {
+              Map<String, dynamic>? result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NotePage(
+                            note: note,
+                          )));
+              updateNote(result, note, index);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                border: Border.all(width: 1, color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    note.title!,
+                    style: const TextStyle(
+                        fontSize: 21.0, fontWeight: FontWeight.w500),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Padding(padding: EdgeInsets.all(4.0)),
+                  Text(
+                    note.note!,
+                    style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.grey[800]
+                            : Colors.grey[400]),
+                    maxLines: 12,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -3,7 +3,7 @@ import '../../models/note.dart';
 
 class NotePage extends StatefulWidget {
   final Note note;
-  const NotePage({Key? key, required this.note}) : super(key: key);
+  const NotePage({super.key, required this.note});
   @override
   State<NotePage> createState() => _NotePageState();
 }
@@ -30,19 +30,23 @@ class _NotePageState extends State<NotePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
         Navigator.pop(context, {
           "title": titleController!.text,
           "note": noteController!.text,
           "time": DateTime.now(),
           "isPinned": pinned
         });
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
+            tooltip: "Back",
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pop(context, {
@@ -57,8 +61,9 @@ class _NotePageState extends State<NotePage> {
             Row(
               children: [
                 IconButton(
+                  tooltip: "Pin",
                   icon: Icon(
-                    Icons.pin_drop,
+                    pinned! ? Icons.push_pin : Icons.push_pin_outlined,
                     color:
                         pinned! ? Theme.of(context).colorScheme.primary : null,
                   ),
@@ -68,6 +73,7 @@ class _NotePageState extends State<NotePage> {
                   },
                 ),
                 IconButton(
+                  tooltip: "Delete",
                   icon: const Icon(Icons.delete),
                   onPressed: () {
                     Navigator.pop(context);
@@ -78,37 +84,51 @@ class _NotePageState extends State<NotePage> {
           ],
           elevation: 0,
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  keyboardType: TextInputType.text,
-                  style: const TextStyle(
-                      fontSize: 25, fontWeight: FontWeight.w500),
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Title",
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 10),
+        body: Hero(
+          tag: "note${widget.note.id}",
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Material(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: TextField(
+                            controller: titleController,
+                            keyboardType: TextInputType.text,
+                            style: const TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.w500),
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                              hintText: "Title",
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.only(left: 10),
+                            ),
+                          ),
+                        ),
+                        const Padding(padding: EdgeInsets.all(4.0)),
+                        Flexible(
+                          child: TextField(
+                            controller: noteController,
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                              hintText: "Note",
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.only(left: 10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const Padding(padding: EdgeInsets.all(4.0)),
-                TextField(
-                  controller: noteController,
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Note",
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 10),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

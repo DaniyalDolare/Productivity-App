@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAI4PvDgMumQ5dRjCWtJWziLMEwdm9r6fo',
-    appId: '1:34420096376:android:219b24a7152327e7bf5c8d',
+    appId: '1:34420096376:android:219e0027736c9ac0bf5c8d',
     messagingSenderId: '34420096376',
     projectId: 'productivity-app-e63c8',
     databaseURL: 'https://productivity-app-e63c8.firebaseio.com',
@@ -77,4 +77,5 @@ class DefaultFirebaseOptions {
     iosClientId: '34420096376-rtb1dnareopcpe2a8v7ij4goetglas7k.apps.googleusercontent.com',
     iosBundleId: 'com.example.productivityApp',
   );
+
 }

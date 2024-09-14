@@ -6,7 +6,7 @@ import 'package:productivity_app/screens/home_screen/tabs.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
   @override
   Widget build(BuildContext context) {
     final userState = FirebaseAuth.instance.authStateChanges();
