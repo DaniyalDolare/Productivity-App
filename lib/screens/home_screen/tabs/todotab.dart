@@ -4,23 +4,23 @@ import 'package:productivity_app/models/todo.dart';
 import 'package:productivity_app/screens/todo/todo_page.dart';
 import 'package:productivity_app/services/database.dart';
 import 'package:productivity_app/services/notification.dart';
+import 'package:productivity_app/widgets/stream_animated_list_builder.dart';
 
 class TodoTab extends StatefulWidget {
-  final String searchText;
   final bool isCurrent;
-  const TodoTab({super.key, required this.searchText, required this.isCurrent});
+  final TextEditingController searchController;
+  const TodoTab(
+      {super.key, required this.isCurrent, required this.searchController});
   @override
   State<TodoTab> createState() => _TodoTabState();
 }
 
 class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
-  List<Todo> _todos = [];
-  final List<Todo> _searchResult = [];
   late Stream<List<Todo>> getTodos;
   late bool searching;
 
-  List<Todo> get todos => searching ? _searchResult : _todos;
-
+  late final GlobalObjectKey<AnimatedListState> _listKey =
+      GlobalObjectKey<AnimatedListState>(this);
   @override
   bool get wantKeepAlive => true;
 
@@ -28,13 +28,16 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     getTodos = DatabaseService.getTodos();
-    searching = widget.isCurrent && widget.searchText.isNotEmpty;
+    searching = widget.isCurrent && widget.searchController.text.isNotEmpty;
+    widget.searchController.addListener(() {
+      searching = widget.isCurrent && widget.searchController.text.isNotEmpty;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    searching = widget.isCurrent && widget.searchText.isNotEmpty;
+    searching = widget.isCurrent && widget.searchController.text.isNotEmpty;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: null,
@@ -44,81 +47,28 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           size: 30,
         ),
       ),
-      body: StreamBuilder(
+      body: StreamAnimatedListBuilder(
+        listKey: _listKey,
+        searchController: widget.searchController,
         stream: getTodos,
-        builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-          if (snapshot.hasData) {
-            _todos = snapshot.data!;
-            if (searching) {
-              search();
-            }
-            return todos.isEmpty
-                ? Center(
-                    child: Text(
-                      searching ? "No match found" : "Add a todo",
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: todos.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final todo = todos[index];
-                      bool checked = todo.isChecked!;
-                      TextStyle style = TextStyle(
-                          fontSize: 18,
-                          color: checked
-                              ? Colors.grey
-                              : Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : null,
-                          decoration: checked
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none);
-                      return Container(
-                        margin: const EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                                activeColor:
-                                    Theme.of(context).colorScheme.primary,
-                                value: checked,
-                                onChanged: (check) => updateTodo(todo, check)),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      todo.title!,
-                                      overflow: TextOverflow.fade,
-                                      style: style,
-                                    ),
-                                  ),
-                                  IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () => deleteTodo(todo))
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-          } else if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                "Something went wrong, please try again",
-                style: TextStyle(color: Colors.grey),
-              ),
-            );
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            return const Center(child: Text("Connection time out"));
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
+        build: (context, item, animation) {
+          return TodoItem(
+              todo: item,
+              onTodoUpdate: updateTodo,
+              onTodoDelete: deleteTodo,
+              index: 0,
+              animation: animation);
         },
+        compareEquals: (p0, p1) => p0.id == p1.id,
+        compareUpdated: (p0, p1) => p0.isUpdated(p1),
+        onEmpty: Center(
+          child: searching
+              ? const Text("No match found")
+              : const Text("Add a todo"),
+        ),
+        onError: const Center(child: Text("Connection time out")),
+        duration: const Duration(milliseconds: 100),
+        filterData: search,
       ),
     );
   }
@@ -137,44 +87,87 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
           addReminder(todo.reminder!);
         }
         DatabaseService.saveTodo(todo).then((value) => todo.setId(value));
-        _todos.insert(0, todo);
       }
     }
   }
 
   void deleteTodo(Todo todo) async {
-    DatabaseService.deleteTodo(todo);
     if (todo.reminder != null) {
       await LocalNotification.flutterLocalNotificationsPlugin
           .cancel(todo.reminder!.date!.microsecond);
     }
-    _todos.remove(todo);
+    DatabaseService.deleteTodo(todo);
   }
 
   void updateTodo(Todo todo, bool? check) {
-    final checked = check!;
-    todo.isChecked = check;
-    DatabaseService.updateTodo(todo);
-    if (checked) {
-      _todos.remove(todo);
-      int checkedIndex = _todos.indexWhere((todo) => todo.isChecked!);
-      if (checkedIndex == -1) {
-        _todos.add(todo);
-      } else {
-        _todos.insert(checkedIndex, todo);
-      }
-    } else {
-      _todos.remove(todo);
-      _todos.insert(0, todo);
-    }
+    DatabaseService.updateTodo(todo.copyWith(isChecked: check));
   }
 
-  void search() {
-    _searchResult.clear();
-    for (var todo in _todos) {
-      if (todo.title!.toLowerCase().contains(widget.searchText.toLowerCase())) {
-        _searchResult.add(todo);
-      }
-    }
+  List<Todo> search(List<Todo> todos) {
+    return todos
+        .where((todo) => todo.title!
+            .toLowerCase()
+            .contains(widget.searchController.text.toLowerCase()))
+        .toList();
+  }
+}
+
+class TodoItem extends StatelessWidget {
+  const TodoItem(
+      {super.key,
+      required this.todo,
+      required this.onTodoUpdate,
+      required this.onTodoDelete,
+      required this.index,
+      required this.animation});
+
+  final Todo todo;
+  final int index;
+  final Animation<double> animation;
+  final void Function(Todo, bool?) onTodoUpdate;
+  final void Function(Todo) onTodoDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    bool checked = todo.isChecked!;
+    TextStyle style = TextStyle(
+        fontSize: 18,
+        color: checked
+            ? Colors.grey
+            : Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : null,
+        decoration: checked ? TextDecoration.lineThrough : TextDecoration.none);
+    return SizeTransition(
+      sizeFactor: animation,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(2.0, 5.0, 2.0, 5.0),
+        child: Row(
+          children: [
+            Checkbox(
+                activeColor: Theme.of(context).colorScheme.primary,
+                value: checked,
+                onChanged: (check) => onTodoUpdate(todo, check)),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      todo.title!,
+                      overflow: TextOverflow.fade,
+                      style: style,
+                    ),
+                  ),
+                  IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => onTodoDelete(todo))
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

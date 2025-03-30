@@ -76,6 +76,17 @@ class Todo {
 
   factory Todo.fromJson(String source) => Todo.fromMap(json.decode(source));
 
+  bool isUpdated(Todo other) {
+    bool isUpdated = other.id == id &&
+        (other.title != title ||
+            other.isChecked != isChecked ||
+            other.time != time ||
+            other.reminder != reminder ||
+            other.data != data ||
+            !listEquals(other.subTodo, subTodo));
+    return isUpdated;
+  }
+
   @override
   String toString() {
     return 'Todo(id: $id, title: $title, isChecked: $isChecked, time: $time, reminder: $reminder, data: $data, subTodo: $subTodo)';
@@ -85,14 +96,7 @@ class Todo {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Todo &&
-        other.id == id &&
-        other.title == title &&
-        other.isChecked == isChecked &&
-        other.time == time &&
-        other.reminder == reminder &&
-        other.data == data &&
-        listEquals(other.subTodo, subTodo);
+    return other is Todo && other.id == id;
   }
 
   @override

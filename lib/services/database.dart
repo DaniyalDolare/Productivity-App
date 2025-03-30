@@ -80,7 +80,7 @@ class DatabaseService {
     return id.then((value) => value.id);
   }
 
-  static void updateTodo(Todo todo) async {
+  static Future<void> updateTodo(Todo todo) async {
     final User user = FirebaseAuth.instance.currentUser!;
     await firestore
         .collection(user.uid)

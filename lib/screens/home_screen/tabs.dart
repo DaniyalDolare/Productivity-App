@@ -23,6 +23,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
   bool searching = false, automaticallyImplyLeading = true;
   FocusNode searchFocusNode = FocusNode();
   String searchText = "";
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
             ? Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  controller: _searchController,
                   focusNode: searchFocusNode,
                   onChanged: (value) {
                     setState(() {
@@ -61,6 +63,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
               if (!searching) {
                 searchFocusNode.requestFocus();
               } else {
+                _searchController.clear();
                 searchText = "";
               }
               setState(() {
@@ -201,9 +204,8 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
             searchText: searchText,
           ),
           TodoTab(
-            isCurrent: tabController.index == 1,
-            searchText: searchText,
-          ),
+              isCurrent: tabController.index == 1,
+              searchController: _searchController),
           const HabitsTab(),
         ],
       ),
