@@ -62,6 +62,9 @@ class _NotesTabState extends State<NotesTab>
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: MasonryGridView.count(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).size.height / 3),
                       itemCount: notes.length,
                       crossAxisCount: 2,
                       mainAxisSpacing: 8.0,
@@ -88,12 +91,9 @@ class _NotesTabState extends State<NotesTab>
   }
 
   void addNote() async {
-    Map<String, dynamic>? result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => NotePage(
-                  note: Note(),
-                )));
+    Map<String, dynamic>? result =
+        await navigateWithTransition(context, NotePage(note: Note()));
+
     if (result != null) {
       if (result["title"] != '' || result["note"] != '') {
         //save note to database and get the uid from databse and save uid to note.id
@@ -159,56 +159,66 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: "note${note.id}",
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            splashColor: Theme.of(context).colorScheme.primary,
-            onTap: () async {
-              Map<String, dynamic>? result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => NotePage(
-                            note: note,
-                          )));
-              updateNote(result, note, index);
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                border: Border.all(width: 1, color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    note.title!,
-                    style: const TextStyle(
-                        fontSize: 21.0, fontWeight: FontWeight.w500),
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Padding(padding: EdgeInsets.all(4.0)),
-                  Text(
-                    note.note!,
-                    style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? Colors.grey[800]
-                            : Colors.grey[400]),
-                    maxLines: 12,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          splashColor: Theme.of(context).colorScheme.primary,
+          onTap: () async {
+            Map<String, dynamic>? result =
+                await navigateWithTransition(context, NotePage(note: note));
+            updateNote(result, note, index);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              border: Border.all(width: 1, color: Colors.grey),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  note.title!,
+                  style: const TextStyle(
+                      fontSize: 21.0, fontWeight: FontWeight.w500),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Padding(padding: EdgeInsets.all(4.0)),
+                Text(
+                  note.note!,
+                  style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.grey[800]
+                          : Colors.grey[400]),
+                  maxLines: 12,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Navigates to [page] with transition
+Future<T?> navigateWithTransition<T>(BuildContext context, Widget page) async {
+  return Navigator.of(context).push(PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Create a Tween for the sliding effect starting from left
+      var beginOffset = const Offset(1, 0); // Center left
+      var endOffset = Offset.zero; // Center of the screen
+      var offsetTween = Tween(begin: beginOffset, end: endOffset);
+      return SlideTransition(
+        position: animation.drive(offsetTween),
+        child: child,
+      );
+    },
+  ));
 }

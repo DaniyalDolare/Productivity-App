@@ -84,51 +84,37 @@ class _NotePageState extends State<NotePage> {
           ],
           elevation: 0,
         ),
-        body: Hero(
-          tag: "note${widget.note.id}",
-          child: LayoutBuilder(
-            builder: (context, constraints) => SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Material(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: TextField(
-                            controller: titleController,
-                            keyboardType: TextInputType.text,
-                            style: const TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.w500),
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: null,
-                            decoration: const InputDecoration(
-                              hintText: "Title",
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.only(left: 10),
-                            ),
-                          ),
-                        ),
-                        const Padding(padding: EdgeInsets.all(4.0)),
-                        Flexible(
-                          child: TextField(
-                            controller: noteController,
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: null,
-                            decoration: const InputDecoration(
-                              hintText: "Note",
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.only(left: 10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(
+                      fontSize: 25, fontWeight: FontWeight.w500),
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Title",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(left: 10),
                   ),
                 ),
-              ),
+                const Padding(padding: EdgeInsets.all(4.0)),
+                TextField(
+                  controller: noteController,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Note",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(left: 10),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
