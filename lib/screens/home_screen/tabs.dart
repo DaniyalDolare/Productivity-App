@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:productivity_app/models/habit.dart';
 import 'package:productivity_app/screens/auth/login.dart';
 import 'package:productivity_app/screens/home_screen/tabs/habitstab.dart';
 import 'package:productivity_app/screens/password_manager/password_manager.dart';
 import 'package:productivity_app/screens/settings/settings.dart';
 import 'package:productivity_app/services/auth.dart';
-
+import 'package:productivity_app/services/database.dart';
+import 'package:productivity_app/services/fcm_notification.dart';
+import 'package:productivity_app/services/local_notification.dart';
 import 'tabs/notestab.dart';
 import 'tabs/todotab.dart';
 
@@ -24,6 +28,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
   FocusNode searchFocusNode = FocusNode();
   String searchText = "";
   final TextEditingController _searchController = TextEditingController();
+  Stream<List<Habit>>? getHabitsStream;
 
   @override
   void initState() {
@@ -33,6 +38,10 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
       length: tabs.length,
       vsync: this,
     );
+    getHabitsStream = DatabaseService.getHabits();
+    if (!kIsWeb) {
+      LocalNotification.rescheduleHabitNotifications(getHabitsStream!);
+    }
   }
 
   @override
@@ -133,6 +142,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
                             ),
                             onPressed: () async {
                               await AuthService.signOutGoogle();
+                              await FCMNotificiation.unsubscribeToTopic();
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(
@@ -206,7 +216,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
           TodoTab(
               isCurrent: tabController.index == 1,
               searchController: _searchController),
-          const HabitsTab(),
+          HabitsTab(habitsStream: getHabitsStream!),
         ],
       ),
     );

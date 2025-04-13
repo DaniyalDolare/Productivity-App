@@ -34,7 +34,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.example.productivity_app"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = "26.1.10909125"
 
     compileOptions {

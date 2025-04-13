@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:productivity_app/models/habit.dart';
 import 'package:productivity_app/screens/habit/add_habit_page.dart';
+import 'package:productivity_app/screens/habit/habit_details_page.dart';
 import 'package:productivity_app/services/database.dart';
+import 'package:productivity_app/services/local_notification.dart';
 import 'package:productivity_app/utils/extensions.dart';
 
 class HabitsTab extends StatefulWidget {
-  const HabitsTab({super.key});
+  const HabitsTab({super.key, required this.habitsStream});
+
+  final Stream<List<Habit>> habitsStream;
 
   @override
   State<HabitsTab> createState() => _HabitsTabState();
 }
 
-class _HabitsTabState extends State<HabitsTab> {
+class _HabitsTabState extends State<HabitsTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final today = DateTime.now();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -22,7 +31,7 @@ class _HabitsTabState extends State<HabitsTab> {
         child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Habit>>(
-        stream: DatabaseService.getHabits(),
+        stream: widget.habitsStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -37,9 +46,10 @@ class _HabitsTabState extends State<HabitsTab> {
             /// true means should be disabled
             final isBefore =
                 today.toDateOnly().isBefore(habit.startDate!.toDateOnly());
-            final isCompleted = habit.lastCompletionHistory != null &&
-                today.toDateOnly().isAtSameMomentAs(
-                    habit.lastCompletionHistory!.time!.toDateOnly());
+            final isCompleted = habit.lastHistory != null &&
+                today
+                    .toDateOnly()
+                    .isAtSameMomentAs(habit.lastHistory!.date!.toDateOnly());
 
             if (isBefore) {
               others.add(habit);
@@ -51,6 +61,7 @@ class _HabitsTabState extends State<HabitsTab> {
           }
 
           return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
             slivers: [
               if (remaining.isNotEmpty) ...[
                 const SliverPadding(
@@ -97,6 +108,10 @@ class _HabitsTabState extends State<HabitsTab> {
                       isCompleted: false),
                 ),
               ],
+              SliverPadding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).size.height / 3),
+              ),
             ],
           );
         },
@@ -113,14 +128,17 @@ class _HabitsTabState extends State<HabitsTab> {
     );
     if (data != null) {
       final habit = Habit(
-        title: data["title"],
-        description: data["description"],
-        currentStreak: 0,
-        highestStreak: 0,
-        startDate: data["startDate"],
-        endDate: data["endDate"],
-      );
-      DatabaseService.saveHabit(habit).then((value) => habit.id = value);
+          title: data["title"],
+          description: data["description"],
+          currentStreak: 0,
+          highestStreak: 0,
+          startDate: data["startDate"],
+          endDate: data["endDate"],
+          time: data["time"]);
+      DatabaseService.saveHabit(habit).then((value) {
+        habit.id = value;
+        LocalNotification.setHabitNotification(habit);
+      });
     }
   }
 }
@@ -139,38 +157,51 @@ class HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey, width: 0.5)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                habit.title!,
-                style: const TextStyle(fontSize: 20),
-              ),
-              Text('Streak: ${habit.currentStreak}')
-            ],
-          ),
-          IconButton(
-            onPressed: isEnabled && !isCompleted
-                ? () {
-                    DatabaseService.addHabitHistory(habit, null);
-                  }
-                : null,
-            icon: Icon(
-              isCompleted ? Icons.check_circle_outline : Icons.done,
-              color: isCompleted ? Colors.green : null,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HabitDetailsPage(habit: habit),
+            ));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey, width: 0.5)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  habit.title!,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                Text('Streak: ${habit.currentStreak}')
+              ],
             ),
-          ),
-        ],
+            IconButton(
+              onPressed: isEnabled && !isCompleted
+                  ? () async {
+                      await LocalNotification.flutterLocalNotificationsPlugin
+                          .cancel(habit.id!.hashCode);
+                      await LocalNotification.setHabitNotification(habit,
+                          scheduleOnly: true);
+                      DatabaseService.addHabitHistory(habit, null);
+                    }
+                  : null,
+              icon: Icon(
+                isCompleted ? Icons.check_circle_outline : Icons.done,
+                color: isCompleted ? Colors.green : null,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

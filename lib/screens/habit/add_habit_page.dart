@@ -14,7 +14,9 @@ class _AddHabitPageState extends State<AddHabitPage> {
   TextEditingController descController = TextEditingController();
   TextEditingController startDateController = TextEditingController();
   TextEditingController endDateController = TextEditingController();
+  TextEditingController timeController = TextEditingController();
   DateTime? startDate, endDate;
+  TimeOfDay? time;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,8 @@ class _AddHabitPageState extends State<AddHabitPage> {
                   "title": titleController.text,
                   "description": descController.text,
                   "startDate": startDate,
-                  "endDate": endDate
+                  "endDate": endDate,
+                  "time": time
                 });
               }
             },
@@ -43,108 +46,138 @@ class _AddHabitPageState extends State<AddHabitPage> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: titleController,
-                validator: (value) => titleController.text.isEmpty
-                    ? "Title should not be empty!"
-                    : null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Title",
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              TextFormField(
-                controller: descController,
-                validator: (value) => descController.text.isEmpty
-                    ? "Description should not be empty!"
-                    : null,
-                decoration: const InputDecoration(
-                  labelText: "Description",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              TextFormField(
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (date != null) {
-                    startDate = date;
-                    startDateController.text = DateFormat.yMd().format(date);
-                  }
-                },
-                validator: (value) => startDate == null
-                    ? "Start date should not be empty!"
-                    : null,
-                readOnly: true,
-                controller: startDateController,
-                decoration: InputDecoration(
-                  suffixIcon: TextButton(
-                    onPressed: () {
-                      startDate = DateTime.now();
-                      startDateController.text =
-                          DateFormat.yMd().format(DateTime.now());
-                    },
-                    child: const Text("Today"),
-                  ),
-                  labelText: "Start Date",
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-              TextFormField(
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: startDate ?? DateTime.now(),
-                    firstDate: startDate ?? DateTime.now(),
-                    lastDate: (startDate ?? DateTime.now())
-                        .add(const Duration(days: 365)),
-                  );
-                  if (date != null) {
-                    endDate = date;
-                    endDateController.text = DateFormat.yMd().format(date);
-                  }
-                },
-                readOnly: true,
-                controller: endDateController,
-                validator: (value) {
-                  if (startDate != null &&
-                      endDate != null &&
-                      endDate!.isBefore(startDate!)) {
-                    return "End date should not be before start date!";
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: "End Date",
-                  border: const OutlineInputBorder(),
-                  suffixIcon: TextButton(
-                    onPressed: () {
-                      endDateController.text = "Never";
-                    },
-                    child: const Text("Never"),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 40.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  validator: (value) => titleController.text.isEmpty
+                      ? "Title should not be empty!"
+                      : null,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Title",
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  controller: descController,
+                  validator: (value) => descController.text.isEmpty
+                      ? "Description should not be empty!"
+                      : null,
+                  decoration: const InputDecoration(
+                    labelText: "Description",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (date != null) {
+                      startDate = date;
+                      startDateController.text = DateFormat.yMd().format(date);
+                    }
+                  },
+                  validator: (value) => startDate == null
+                      ? "Start date should not be empty!"
+                      : null,
+                  readOnly: true,
+                  controller: startDateController,
+                  decoration: InputDecoration(
+                    suffixIcon: TextButton(
+                      onPressed: () {
+                        startDate = DateTime.now();
+                        startDateController.text =
+                            DateFormat.yMd().format(DateTime.now());
+                      },
+                      child: const Text("Today"),
+                    ),
+                    labelText: "Start Date",
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  onTap: () async {
+                    final selectedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (selectedTime != null) {
+                      time = selectedTime;
+                      timeController.text = time!.format(context);
+                    }
+                  },
+                  readOnly: true,
+                  controller: timeController,
+                  decoration: InputDecoration(
+                    suffixIcon: TextButton(
+                      onPressed: () {
+                        time = const TimeOfDay(hour: 0, minute: 0);
+                        timeController.text = time!.format(context);
+                      },
+                      child: const Text("Clear"),
+                    ),
+                    labelText: "Time (Optional)",
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: startDate ?? DateTime.now(),
+                      firstDate: startDate ?? DateTime.now(),
+                      lastDate: (startDate ?? DateTime.now())
+                          .add(const Duration(days: 365)),
+                    );
+                    if (date != null) {
+                      endDate = date;
+                      endDateController.text = DateFormat.yMd().format(date);
+                    }
+                  },
+                  readOnly: true,
+                  controller: endDateController,
+                  validator: (value) {
+                    if (startDate != null &&
+                        endDate != null &&
+                        endDate!.isBefore(startDate!)) {
+                      return "End date should not be before start date!";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "End Date",
+                    border: const OutlineInputBorder(),
+                    suffixIcon: TextButton(
+                      onPressed: () {
+                        endDateController.text = "Never";
+                      },
+                      child: const Text("Never"),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
