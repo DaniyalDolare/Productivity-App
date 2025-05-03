@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:productivity_app/models/habit.dart';
-import 'package:productivity_app/screens/habit/add_habit_page.dart';
+import 'package:productivity_app/screens/habit/add_edit_habit_page.dart';
 import 'package:productivity_app/screens/habit/habit_details_page.dart';
 import 'package:productivity_app/services/database.dart';
 import 'package:productivity_app/services/local_notification.dart';
@@ -119,27 +119,14 @@ class _HabitsTabState extends State<HabitsTab>
     );
   }
 
-  Future<void> addHabit() async {
-    final data = await Navigator.push(
+  void addHabit() {
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddHabitPage(),
+        builder: (context) =>
+            AddEditHabitPage(habit: Habit(), isEditMode: false),
       ),
     );
-    if (data != null) {
-      final habit = Habit(
-          title: data["title"],
-          description: data["description"],
-          currentStreak: 0,
-          highestStreak: 0,
-          startDate: data["startDate"],
-          endDate: data["endDate"],
-          time: data["time"]);
-      DatabaseService.saveHabit(habit).then((value) {
-        habit.id = value;
-        LocalNotification.setHabitNotification(habit);
-      });
-    }
   }
 }
 

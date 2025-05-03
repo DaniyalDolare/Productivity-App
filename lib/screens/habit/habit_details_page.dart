@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:productivity_app/models/habit.dart';
 import 'package:productivity_app/models/history.dart';
+import 'package:productivity_app/screens/habit/add_edit_habit_page.dart';
 import 'package:productivity_app/services/database.dart';
+import 'package:productivity_app/services/local_notification.dart';
 import 'package:productivity_app/utils/extensions.dart';
 
 class HabitDetailsPage extends StatefulWidget {
@@ -44,6 +46,31 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AddEditHabitPage(habit: widget.habit, isEditMode: true),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final cancelNotification = LocalNotification
+                  .flutterLocalNotificationsPlugin
+                  .cancel(widget.habit.id.hashCode);
+              final deleteHabit = DatabaseService.deleteHabit(widget.habit);
+              await Future.wait([cancelNotification, deleteHabit]);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<History>>(
           future: getHistories,

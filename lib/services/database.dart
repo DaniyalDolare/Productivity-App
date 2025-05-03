@@ -134,22 +134,9 @@ class DatabaseService {
     final User user = FirebaseAuth.instance.currentUser!;
     var docReference =
         firestore.collection(user.uid).doc('data').collection('habits').doc();
-    // Timestamp? startDate = Timestamp.fromDate(habit.startDate!);
-    // Timestamp? endDate =
-    //     habit.endDate != null ? Timestamp.fromDate(habit.endDate!) : null;
-    // String? time =
-    //     habit.time != null ? "${habit.time!.hour}:${habit.time!.minute}" : null;
     await docReference.set(habit.toMap()
-          ..remove("id")
-          ..remove("history")
-        // ..addAll(
-        //   {
-        //     "startDate": startDate,
-        //     "endDate": endDate,
-        //     "time": time,
-        //   },
-        // ),
-        );
+      ..remove("id")
+      ..remove("history"));
 
     String timeSlot = DatabaseService.getTimeSlot(habit);
 
@@ -171,6 +158,43 @@ class DatabaseService {
     return docReference.id;
   }
 
+  static Future<void> updateHabit(Habit habit, String oldTimeSlot) async {
+    final User user = FirebaseAuth.instance.currentUser!;
+    var docReference = firestore
+        .collection(user.uid)
+        .doc('data')
+        .collection('habits')
+        .doc(habit.id);
+    await docReference.update(habit.toMap()
+      ..remove("id")
+      ..remove("history"));
+
+    await firestore
+        .collection("scheduledHabits")
+        .doc(oldTimeSlot)
+        .collection("scheduledHabits")
+        .doc("${user.uid}-${habit.id}")
+        .delete();
+
+    String timeSlot = DatabaseService.getTimeSlot(habit);
+
+    var scheduledHabitDocReference = firestore
+        .collection("scheduledHabits")
+        .doc(timeSlot)
+        .collection("scheduledHabits")
+        .doc("${user.uid}-${docReference.id}");
+    await scheduledHabitDocReference.set(ScheduledHabit(
+            userId: user.uid,
+            habitId: habit.id,
+            title: habit.title,
+            currentStreak: habit.currentStreak,
+            highestStreak: habit.highestStreak,
+            startDate: habit.startDate,
+            time: habit.time)
+        .toMap()
+      ..remove("id"));
+  }
+
   static Stream<List<Habit>> getHabits() {
     final User user = FirebaseAuth.instance.currentUser!;
     final habitsColectionRef =
@@ -186,17 +210,6 @@ class DatabaseService {
         final history = data["lastHistory"] != null
             ? History.fromMap(data["lastHistory"])
             : null;
-        // data.update("startDate", (value) => value?.toDate());
-        // data.update("endDate", (value) => value?.toDate());
-        // data.update("time", (value) {
-        //   if (value != null) {
-        //     var time = value.split(":");
-        //     return TimeOfDay(
-        //         hour: int.parse(time[0]), minute: int.parse(time[1]));
-        //   }
-        //   return value;
-        // });
-        // data.update("lastHistory", (value) => history, ifAbsent: () => history);
 
         if (history != null) {
           final isBeforeOneDay = history.date!.toDateOnly().isBefore(
@@ -324,5 +337,27 @@ class DatabaseService {
             ? "${timeslotDateTime.minute ~/ 10}0"
             : "${timeslotDateTime.minute ~/ 10}5";
     return "$hour:$minute";
+  }
+
+  static Future<void> deleteHabit(Habit habit) async {
+    final User user = FirebaseAuth.instance.currentUser!;
+    await firestore
+        .collection("scheduledHabits")
+        .doc(getTimeSlot(habit))
+        .collection("scheduledHabits")
+        .doc("${user.uid}-${habit.id}")
+        .delete();
+    await firestore
+        .collection(user.uid)
+        .doc('data')
+        .collection('dismissedHabits')
+        .doc(habit.id)
+        .delete();
+    await firestore
+        .collection(user.uid)
+        .doc('data')
+        .collection('habits')
+        .doc(habit.id)
+        .delete();
   }
 }

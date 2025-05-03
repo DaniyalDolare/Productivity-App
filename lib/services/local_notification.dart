@@ -184,8 +184,8 @@ class LocalNotification {
     });
   }
 
-  static void rescheduleHabitNotifications(Stream<List<Habit>> habitsStream) {
-    Future.wait([
+  static Future<void> rescheduleHabitNotifications(Stream<List<Habit>> habitsStream) async {
+    await Future.wait([
       LocalNotification.flutterLocalNotificationsPlugin
           .getActiveNotifications(),
       habitsStream.first,

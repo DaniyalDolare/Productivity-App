@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:productivity_app/models/habit.dart';
+import 'package:productivity_app/services/database.dart';
+import 'package:productivity_app/services/local_notification.dart';
 
-class AddHabitPage extends StatefulWidget {
-  const AddHabitPage({super.key});
-
+class AddEditHabitPage extends StatefulWidget {
+  const AddEditHabitPage(
+      {required this.isEditMode, super.key, required this.habit});
+  final bool isEditMode;
+  final Habit habit;
   @override
-  State<AddHabitPage> createState() => _AddHabitPageState();
+  State<AddEditHabitPage> createState() => _AddEditHabitPageState();
 }
 
-class _AddHabitPageState extends State<AddHabitPage> {
+class _AddEditHabitPageState extends State<AddEditHabitPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController titleController = TextEditingController();
   TextEditingController descController = TextEditingController();
@@ -18,8 +23,56 @@ class _AddHabitPageState extends State<AddHabitPage> {
   DateTime? startDate, endDate;
   TimeOfDay? time;
 
+  void saveHabit() {
+    if (_formKey.currentState!.validate()) {
+      if (widget.isEditMode) {
+        String oldTimeSlot = DatabaseService.getTimeSlot(widget.habit);
+        widget.habit
+          ..title = titleController.text
+          ..description = descController.text
+          ..startDate = startDate
+          ..endDate = endDate
+          ..time = time;
+        DatabaseService.updateHabit(widget.habit, oldTimeSlot)
+            .then((value) async {
+          await LocalNotification.flutterLocalNotificationsPlugin
+              .cancel(widget.habit.id.hashCode);
+          LocalNotification.setHabitNotification(widget.habit);
+        });
+
+        Navigator.pop(context);
+      } else {
+        final habit = Habit(
+            title: titleController.text,
+            description: descController.text,
+            currentStreak: 0,
+            highestStreak: 0,
+            startDate: startDate,
+            endDate: endDate,
+            time: time);
+        DatabaseService.saveHabit(habit).then((value) {
+          habit.id = value;
+          LocalNotification.setHabitNotification(habit);
+        });
+      }
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.isEditMode) {
+      titleController.text = widget.habit.title ?? "";
+      descController.text = widget.habit.description ?? "";
+      startDate = widget.habit.startDate;
+      startDateController.text =
+          startDate != null ? DateFormat.yMd().format(startDate!) : "";
+      endDate = widget.habit.endDate;
+      endDateController.text =
+          endDate != null ? DateFormat.yMd().format(endDate!) : "Never";
+      time = widget.habit.time;
+      timeController.text = time != null ? time!.format(context) : "";
+    }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -31,17 +84,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                Navigator.pop(context, {
-                  "title": titleController.text,
-                  "description": descController.text,
-                  "startDate": startDate,
-                  "endDate": endDate,
-                  "time": time
-                });
-              }
-            },
+            onPressed: saveHabit,
             child: const Text("Save"),
           )
         ],
@@ -117,7 +160,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                   onTap: () async {
                     final selectedTime = await showTimePicker(
                       context: context,
-                      initialTime: TimeOfDay.now(),
+                      initialTime: time ?? TimeOfDay.now(),
                     );
                     if (selectedTime != null) {
                       time = selectedTime;

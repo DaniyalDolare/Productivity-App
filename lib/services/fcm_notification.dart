@@ -1,50 +1,31 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:productivity_app/models/habit.dart';
+import 'package:productivity_app/services/database.dart';
 import 'package:productivity_app/services/local_notification.dart';
+import 'package:productivity_app/utils/extensions.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:productivity_app/firebase_options.dart';
 
 class FCMNotificiation {
   static FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   static Future<void> initialize() async {
-    final notificationSettings =
-        await messaging.requestPermission(provisional: true);
-    print(
-        "notificationSettings.authorizationStatus: ${notificationSettings.authorizationStatus}");
-
-    // final fcmToken = await FirebaseMessaging.instance.getToken();
-    // print("fcmToken: $fcmToken");
-
-    // FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
-    //   print("fcmToken: $fcmToken");
-    //   // TODO: If necessary send token to application server.
-
-    //   // Note: This callback is fired at each app startup and whenever a new
-    //   // token is generated.
-    // }).onError((err) {
-    //   // Error getting token.
-    //   print("err: $err");
-    // });
+    await messaging.requestPermission(provisional: true);
 
     messaging.getInitialMessage().then(
-      (initialMessage) {
-        print("getInitialMessage ${DateTime.now()} ${initialMessage?.toMap()}");
-      },
-    );
+          (initialMessage) {},
+        );
 
     FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) {
-        print("onMessageOpenedApp ${DateTime.now()} ${message.toMap()}");
-      },
+      (message) {},
     );
 
     FirebaseMessaging.onMessage.listen(
       (message) {
-        print("onMessage ${DateTime.now()} ${message.toMap()}");
         scheduleHabitFromFCMMessage(message);
       },
     );
@@ -54,7 +35,6 @@ class FCMNotificiation {
 
   static Future<void> subsribeToTopic(String topic) async {
     await messaging.subscribeToTopic(topic);
-    print("Subscribed to topic $topic");
   }
 
   static Future<void> unsubscribeToTopic() async {
@@ -64,7 +44,7 @@ class FCMNotificiation {
     }
   }
 
-  static void scheduleHabitFromFCMMessage(RemoteMessage message) {
+  static Future<void> scheduleHabitFromFCMMessage(RemoteMessage message) async {
     if (message.data.isNotEmpty) {
       final data = jsonDecode(
         message.data["data"],
@@ -83,13 +63,25 @@ class FCMNotificiation {
           return value;
         },
       );
-      final habitId = data["habitId"];
-      final title = data["title"];
-      final currentStreak = data["currentStreak"];
-      final highestStreak = data["highestStreak"];
-      final startDate = data["startDate"];
-      final completedDate = data["completedDate"];
-      final time = data["time"];
+      final String habitId = data["habitId"];
+      final String title = data["title"];
+      final int currentStreak = data["currentStreak"];
+      final int highestStreak = data["highestStreak"];
+      final DateTime startDate = data["startDate"];
+      final DateTime? completedDate = data["completedDate"];
+      final TimeOfDay time = data["time"];
+
+      final activeNotifications = await LocalNotification
+          .flutterLocalNotificationsPlugin
+          .getActiveNotifications();
+      bool isActive = false;
+      for (var activeNotification in activeNotifications) {
+        if (activeNotification.id == habitId.hashCode) {
+          isActive = true; // Notification is already active
+          break;
+        }
+      }
+
       Habit habit = Habit(
           id: habitId,
           title: title,
@@ -97,13 +89,26 @@ class FCMNotificiation {
           highestStreak: highestStreak,
           startDate: startDate,
           time: time);
-      LocalNotification.setHabitNotification(habit);
+
+      // Show/schedule notification if not completed today
+      if (!isActive &&
+          (completedDate == null ||
+              !completedDate
+                  .toDateOnly()
+                  .isAtSameMomentAs(DateTime.now().toDateOnly()))) {
+        await LocalNotification.setHabitNotification(habit);
+      }
     }
+    // Reschedule habit notifications which might have been missed/dismissed by system
+    await LocalNotification.rescheduleHabitNotifications(
+        DatabaseService.getHabits());
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("onBackgroundMessage: ${DateTime.now()} ${message.toMap()}");
-  FCMNotificiation.scheduleHabitFromFCMMessage(message);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FCMNotificiation.scheduleHabitFromFCMMessage(message);
 }

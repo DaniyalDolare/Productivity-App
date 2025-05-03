@@ -8,7 +8,6 @@ import 'package:productivity_app/services/fcm_notification.dart';
 import 'package:productivity_app/services/local_notification.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
