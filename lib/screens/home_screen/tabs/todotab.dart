@@ -3,7 +3,7 @@ import 'package:productivity_app/models/reminder.dart';
 import 'package:productivity_app/models/todo.dart';
 import 'package:productivity_app/screens/todo/todo_page.dart';
 import 'package:productivity_app/services/database.dart';
-import 'package:productivity_app/services/notification.dart';
+import 'package:productivity_app/services/local_notification.dart';
 import 'package:productivity_app/widgets/stream_animated_list_builder.dart';
 
 class TodoTab extends StatefulWidget {

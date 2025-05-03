@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:productivity_app/provider/theme_provider.dart';
 import 'package:productivity_app/screens/auth/login.dart';
 import 'package:productivity_app/screens/home_screen/tabs.dart';
+import 'package:productivity_app/services/fcm_notification.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
@@ -46,6 +47,9 @@ class Home extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.active) {
               final User? user = snapshot.data;
+              if (user != null) {
+                FCMNotificiation.subsribeToTopic(user.uid);
+              }
               return user != null ? const Tabs() : const LoginPage();
             }
             return const Scaffold(

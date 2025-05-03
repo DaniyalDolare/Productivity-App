@@ -3,7 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as t;
 import 'package:timezone/timezone.dart' as tz;
-import '../services/notification.dart';
+import '../services/local_notification.dart';
 
 class Reminder {
   String? title;
