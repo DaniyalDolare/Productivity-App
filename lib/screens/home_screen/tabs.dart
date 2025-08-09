@@ -141,8 +141,11 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
                               color: Colors.white,
                             ),
                             onPressed: () async {
-                              await AuthService.signOutGoogle();
+                              await LocalNotification
+                                  .flutterLocalNotificationsPlugin
+                                  .cancelAll();
                               await FCMNotificiation.unsubscribeToTopic();
+                              await AuthService.signOutGoogle();
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(

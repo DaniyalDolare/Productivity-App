@@ -46,10 +46,10 @@ class _HabitsTabState extends State<HabitsTab>
             /// true means should be disabled
             final isBefore =
                 today.toDateOnly().isBefore(habit.startDate!.toDateOnly());
-            final isCompleted = habit.lastHistory != null &&
+            final isCompleted = habit.completedDate != null &&
                 today
                     .toDateOnly()
-                    .isAtSameMomentAs(habit.lastHistory!.date!.toDateOnly());
+                    .isAtSameMomentAs(habit.completedDate!.toDateOnly());
 
             if (isBefore) {
               others.add(habit);

@@ -207,12 +207,10 @@ class DatabaseService {
       // Fetch the latest history for each habit
       for (var e in event.docs) {
         final data = e.data();
-        final history = data["lastHistory"] != null
-            ? History.fromMap(data["lastHistory"])
-            : null;
+        final DateTime? completedDate = data["completedDate"]?.toDate();
 
-        if (history != null) {
-          final isBeforeOneDay = history.date!.toDateOnly().isBefore(
+        if (completedDate != null) {
+          final isBeforeOneDay = completedDate.toDateOnly().isBefore(
               DateTime.now().subtract(const Duration(days: 1)).toDateOnly());
           // If last history was before one day, set currentStreak to 0
           if (isBeforeOneDay && data["currentStreak"] != 0) {
@@ -255,14 +253,15 @@ class DatabaseService {
     int currentStreak = habit.currentStreak!,
         highestStreak = habit.highestStreak!;
     final today = DateTime.now();
-    final previousDay = habit.lastHistory?.date;
+    final previousDay = habit.completedDate;
 
     if (previousDay == null) {
       currentStreak = 1;
       highestStreak = max(currentStreak, highestStreak);
-    } else if (previousDay.add(const Duration(days: 1)).day == today.day &&
-        previousDay.add(const Duration(days: 1)).month == today.month &&
-        previousDay.add(const Duration(days: 1)).year == today.year) {
+    } else if (previousDay
+        .add(const Duration(days: 1))
+        .toDateOnly()
+        .isAtSameMomentAs(today.toDateOnly())) {
       highestStreak = highestStreak + (currentStreak == highestStreak ? 1 : 0);
       currentStreak++;
     } else {
@@ -270,17 +269,13 @@ class DatabaseService {
       highestStreak = max(currentStreak, highestStreak);
     }
 
-    // Add habit history and update the currentStreak, highestStreak and lastHistory
+    // Add habit history and update the currentStreak, highestStreak and completedDate
     final latestHistoryRef = habitReference.collection("history").doc();
     latestHistoryRef.set({"date": Timestamp.fromDate(today), "note": note});
     habitReference.update({
       "currentStreak": currentStreak,
       "highestStreak": highestStreak,
-      "lastHistory": {
-        "id": latestHistoryRef.id,
-        "date": Timestamp.fromDate(today),
-        "note": note
-      }
+      "completedDate": Timestamp.fromDate(today)
     });
 
     // Update the completed date property of scheduledHabit
@@ -290,7 +285,11 @@ class DatabaseService {
         .doc(timeSlot)
         .collection('scheduledHabits')
         .doc("${user.uid}-${habit.id}")
-        .update({"completedDate": Timestamp.fromDate(today)});
+        .update({
+      "currentStreak": currentStreak,
+      "highestStreak": highestStreak,
+      "completedDate": Timestamp.fromDate(today)
+    });
   }
 
   static Future<void> addDismissedHabit(DismissedHabit dismissedHabit) {

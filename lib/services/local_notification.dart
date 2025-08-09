@@ -184,7 +184,8 @@ class LocalNotification {
     });
   }
 
-  static Future<void> rescheduleHabitNotifications(Stream<List<Habit>> habitsStream) async {
+  static Future<void> rescheduleHabitNotifications(
+      Stream<List<Habit>> habitsStream) async {
     await Future.wait([
       LocalNotification.flutterLocalNotificationsPlugin
           .getActiveNotifications(),
@@ -205,15 +206,14 @@ class LocalNotification {
           .map((dismissedHabit) => dismissedHabit.id!)
           .toSet();
       for (var habit in habits) {
-        var history = habit.lastHistory;
         final isNotActive = !activeNotificationIds.contains(habit.id.hashCode);
         final isNotDismissed = !dismissedHabitsIds.contains(habit.id);
-        final isStartingFromToday = history == null &&
+        final isStartingFromToday = habit.completedDate == null &&
             habit.startDate!
                 .toDateOnly()
                 .isAtSameMomentAs(DateTime.now().toDateOnly());
-        final isNotCompletedForToday = history != null
-            ? !history.date!
+        final isNotCompletedForToday = habit.completedDate != null
+            ? !habit.completedDate!
                 .toDateOnly()
                 .isAtSameMomentAs(DateTime.now().toDateOnly())
             : true;

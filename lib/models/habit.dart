@@ -14,7 +14,7 @@ class Habit {
   String? category;
   DateTime? startDate;
   DateTime? endDate;
-  History? lastHistory;
+  DateTime? completedDate;
   TimeOfDay? time;
 
   Habit(
@@ -27,7 +27,7 @@ class Habit {
       this.category,
       this.startDate,
       this.endDate,
-      this.lastHistory,
+      this.completedDate,
       this.time});
 
   Map<String, dynamic> toMap() {
@@ -41,7 +41,8 @@ class Habit {
       'category': category,
       'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
       'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
-      'lastHistory': lastHistory?.toMap(),
+      'completedDate':
+          completedDate != null ? Timestamp.fromDate(completedDate!) : null,
       'time': time != null ? "${time!.hour}:${time!.minute}" : null
     };
   }
@@ -62,9 +63,7 @@ class Habit {
       category: map['category'],
       startDate: map['startDate']?.toDate(),
       endDate: map['endDate']?.toDate(),
-      lastHistory: map["lastHistory"] != null
-          ? History.fromMap(map["lastHistory"])
-          : null,
+      completedDate: map['completedDate']?.toDate(),
       time: time,
     );
   }
@@ -85,14 +84,18 @@ class Habit {
         endDate: endDate,
         time: time,
         currentStreak: currentStreak,
-        highestStreak: highestStreak);
+        highestStreak: highestStreak,
+        completedDate: completedDate);
     return habit.toJson();
   }
 
   factory Habit.fromJson(String source) => Habit.fromMap(json.decode(
         source,
         reviver: (key, value) {
-          if ((key == "startDate" || key == "endDate") && value != null) {
+          if ((key == "startDate" ||
+                  key == "endDate" ||
+                  key == "completedDate") &&
+              value != null) {
             final regex =
                 RegExp(r'Timestamp\(seconds=(\d+), nanoseconds=(\d+)\)');
             final match = regex.firstMatch(value as String);
@@ -118,7 +121,7 @@ class Habit {
       String? category,
       DateTime? startDate,
       DateTime? endDate,
-      History? lastHistory,
+      DateTime? completedDate,
       TimeOfDay? time}) {
     return Habit(
         id: id ?? this.id,
@@ -130,13 +133,13 @@ class Habit {
         category: category ?? this.category,
         startDate: startDate ?? this.startDate,
         endDate: endDate ?? this.endDate,
-        lastHistory: lastHistory ?? this.lastHistory,
+        completedDate: completedDate ?? this.completedDate,
         time: time ?? this.time);
   }
 
   @override
   String toString() {
-    return 'Habit(id: $id, title: $title, description: $description, history: $history, currentStreak: $currentStreak, highestStreak: $highestStreak, category: $category, startDate: $startDate, endDate: $endDate, lastHistory: $lastHistory, time: $time)';
+    return 'Habit(id: $id, title: $title, description: $description, history: $history, currentStreak: $currentStreak, highestStreak: $highestStreak, category: $category, startDate: $startDate, endDate: $endDate, completedDate: $completedDate, time: $time)';
   }
 
   @override
@@ -153,7 +156,7 @@ class Habit {
         other.category == category &&
         other.startDate == startDate &&
         other.endDate == endDate &&
-        other.lastHistory == lastHistory &&
+        other.completedDate == completedDate &&
         other.time == time;
   }
 
@@ -168,7 +171,7 @@ class Habit {
         category.hashCode ^
         startDate.hashCode ^
         endDate.hashCode ^
-        lastHistory.hashCode ^
+        completedDate.hashCode ^
         time.hashCode;
   }
 }
