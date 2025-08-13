@@ -72,6 +72,6 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ env.SERVICE_ACCOUNT_PATH }}
-          packageName: com.daniyal.producivity_app
+          packageName: com.daniyal.productivity_app
           releaseFiles: ${{ env.AAB_PATH }}
           track: beta
