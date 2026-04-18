@@ -7,9 +7,15 @@ import 'package:productivity_app/services/local_notification.dart';
 import 'package:productivity_app/utils/extensions.dart';
 
 class HabitsTab extends StatefulWidget {
-  const HabitsTab({super.key, required this.habitsStream});
+  const HabitsTab(
+      {super.key,
+      required this.habitsStream,
+      required this.isCurrent,
+      required this.searchText});
 
   final Stream<List<Habit>> habitsStream;
+  final bool isCurrent;
+  final String searchText;
 
   @override
   State<HabitsTab> createState() => _HabitsTabState();
@@ -24,6 +30,7 @@ class _HabitsTabState extends State<HabitsTab>
   Widget build(BuildContext context) {
     super.build(context);
     final today = DateTime.now();
+    final searching = widget.isCurrent && widget.searchText.trim().isNotEmpty;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: null,
@@ -36,10 +43,42 @@ class _HabitsTabState extends State<HabitsTab>
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final habits = snapshot.data!;
-          if (habits.isEmpty) {
-            return const Center(child: Text("No Habits added yet!"));
+          final allHabits = snapshot.data!;
+          if (allHabits.isEmpty) {
+            return Center(
+              child: Text(searching ? "No match found" : "No Habits added yet!"),
+            );
           }
+
+          final query = widget.searchText.trim().toLowerCase();
+          final List<Habit> habits = searching
+              ? allHabits.where((habit) {
+                  final title = habit.title?.toLowerCase() ?? "";
+                  final description = habit.description?.toLowerCase() ?? "";
+                  return title.contains(query) || description.contains(query);
+                }).toList()
+              : List<Habit>.from(allHabits);
+
+          if (habits.isEmpty) {
+            return const Center(child: Text("No match found"));
+          }
+
+          // Global time-based sorting before splitting into sections.
+          // - null time is treated as 00:00 and ordered before explicit 00:00.
+          habits.sort((a, b) {
+            final aHasTime = a.time != null;
+            final bHasTime = b.time != null;
+            final aMinutes = (a.time?.hour ?? 0) * 60 + (a.time?.minute ?? 0);
+            final bMinutes = (b.time?.hour ?? 0) * 60 + (b.time?.minute ?? 0);
+
+            if (aMinutes != bMinutes) return aMinutes.compareTo(bMinutes);
+            if (aHasTime != bHasTime) return aHasTime ? 1 : -1;
+
+            final aTitle = (a.title ?? "").toLowerCase();
+            final bTitle = (b.title ?? "").toLowerCase();
+            return aTitle.compareTo(bTitle);
+          });
+
           final (completed, remaining, others) =
               (<Habit>[], <Habit>[], <Habit>[]);
           for (Habit habit in habits) {

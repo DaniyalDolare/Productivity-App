@@ -219,7 +219,11 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
           TodoTab(
               isCurrent: tabController.index == 1,
               searchController: _searchController),
-          HabitsTab(habitsStream: getHabitsStream!),
+          HabitsTab(
+            habitsStream: getHabitsStream!,
+            isCurrent: tabController.index == 2,
+            searchText: searchText,
+          ),
         ],
       ),
     );
