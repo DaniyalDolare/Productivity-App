@@ -46,7 +46,8 @@ class _HabitsTabState extends State<HabitsTab>
           final allHabits = snapshot.data!;
           if (allHabits.isEmpty) {
             return Center(
-              child: Text(searching ? "No match found" : "No Habits added yet!"),
+              child:
+                  Text(searching ? "No match found" : "No Habits added yet!"),
             );
           }
 
@@ -215,7 +216,7 @@ class HabitCard extends StatelessWidget {
               onPressed: isEnabled && !isCompleted
                   ? () async {
                       await LocalNotification.flutterLocalNotificationsPlugin
-                          .cancel(habit.id!.hashCode);
+                          .cancel(id: habit.id!.hashCode);
                       await LocalNotification.setHabitNotification(habit,
                           scheduleOnly: true);
                       DatabaseService.addHabitHistory(habit, null);

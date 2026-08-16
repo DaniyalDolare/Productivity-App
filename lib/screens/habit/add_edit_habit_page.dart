@@ -36,7 +36,7 @@ class _AddEditHabitPageState extends State<AddEditHabitPage> {
         DatabaseService.updateHabit(widget.habit, oldTimeSlot)
             .then((value) async {
           await LocalNotification.flutterLocalNotificationsPlugin
-              .cancel(widget.habit.id.hashCode);
+              .cancel(id: widget.habit.id.hashCode);
           LocalNotification.setHabitNotification(widget.habit);
         });
 

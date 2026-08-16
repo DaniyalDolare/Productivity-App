@@ -66,7 +66,8 @@ Future<void> addReminder(Reminder reminder) async {
   t.initializeTimeZones();
 
   //get current local timezone name
-  final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+  final String currentTimeZone =
+      (await FlutterTimezone.getLocalTimezone()).identifier;
 
   //get timezone location
   final location = tz.getLocation(currentTimeZone);
@@ -89,12 +90,11 @@ Future<void> addReminder(Reminder reminder) async {
 
   //id for each reminder should be different
   await LocalNotification.flutterLocalNotificationsPlugin.zonedSchedule(
-      reminder.date!.microsecond,
-      "Todo",
-      reminder.title,
-      scheduledDate,
-      notificationDetails,
+      id: reminder.date!.microsecond,
+      scheduledDate: scheduledDate,
+      notificationDetails: notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime);
+      title: "Todo",
+      body: reminder.title,
+      matchDateTimeComponents: DateTimeComponents.time);
 }

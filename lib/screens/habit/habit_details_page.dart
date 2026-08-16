@@ -64,7 +64,7 @@ class _HabitDetailsPageState extends State<HabitDetailsPage> {
             onPressed: () async {
               final cancelNotification = LocalNotification
                   .flutterLocalNotificationsPlugin
-                  .cancel(widget.habit.id.hashCode);
+                  .cancel(id: widget.habit.id.hashCode);
               final deleteHabit = DatabaseService.deleteHabit(widget.habit);
               await Future.wait([cancelNotification, deleteHabit]);
               Navigator.pop(context);

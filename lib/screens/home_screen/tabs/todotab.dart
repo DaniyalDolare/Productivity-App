@@ -94,7 +94,7 @@ class _TodoTabState extends State<TodoTab> with AutomaticKeepAliveClientMixin {
   void deleteTodo(Todo todo) async {
     if (todo.reminder != null) {
       await LocalNotification.flutterLocalNotificationsPlugin
-          .cancel(todo.reminder!.date!.microsecond);
+          .cancel(id: todo.reminder!.date!.microsecond);
     }
     DatabaseService.deleteTodo(todo);
   }

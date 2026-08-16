@@ -35,7 +35,7 @@ class LocalNotification {
             iOS: initializationSettingsIOS);
 
     final isInitialized = await flutterLocalNotificationsPlugin.initialize(
-        initializationSettings,
+        settings: initializationSettings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
         onDidReceiveBackgroundNotificationResponse:
             onDidReceiveNotificationResponse);
@@ -130,7 +130,8 @@ class LocalNotification {
     t.initializeTimeZones();
 
     //get current local timezone name
-    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    final String currentTimeZone =
+        (await FlutterTimezone.getLocalTimezone()).identifier;
 
     //get timezone location
     final location = tz.getLocation(currentTimeZone);
@@ -146,7 +147,10 @@ class LocalNotification {
                 !habit.time!
                     .isAfter(TimeOfDay(hour: now.hour, minute: now.minute))))) {
       await flutterLocalNotificationsPlugin.show(
-          habit.id.hashCode, "Habit", habit.title, notificationDetails,
+          id: habit.id.hashCode,
+          title: "Habit",
+          body: habit.title,
+          notificationDetails: notificationDetails,
           payload: habit.notificationPayload());
     }
     if (habit.time != null) {
@@ -157,14 +161,12 @@ class LocalNotification {
     //TZDateTime format of DateTime
     final scheduledDate = tz.TZDateTime.from(date, location);
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      habit.id.hashCode,
-      "Habit",
-      habit.title,
-      scheduledDate,
+      id: habit.id.hashCode,
+      scheduledDate: scheduledDate,
+      notificationDetails: notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      notificationDetails,
+      title: "Habit",
+      body: habit.title,
       payload: habit.notificationPayload(),
       matchDateTimeComponents: DateTimeComponents.time,
     );
@@ -223,7 +225,7 @@ class LocalNotification {
           setHabitNotification(habit);
         } else if (!isNotCompletedForToday &&
             activeNotificationIds.contains(habit.id.hashCode)) {
-          flutterLocalNotificationsPlugin.cancel(habit.id.hashCode);
+          flutterLocalNotificationsPlugin.cancel(id: habit.id.hashCode);
           setHabitNotification(habit, scheduleOnly: true);
         }
       }
@@ -246,7 +248,7 @@ void onDidReceiveNotificationResponse(
         if (notificationResponse.actionId == "0") {
           debugPrint(payload);
           await LocalNotification.flutterLocalNotificationsPlugin
-              .cancel(habit.id!.hashCode);
+              .cancel(id: habit.id!.hashCode);
           await LocalNotification.setHabitNotification(habit,
               scheduleOnly: true);
           DatabaseService.addHabitHistory(habit, null);

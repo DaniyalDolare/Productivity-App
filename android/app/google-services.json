@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "34420096376-jlh0bm3qp5q0mi2m6kq1fe211a8f0o3e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.daniyal.productivity_app",
+            "certificate_hash": "8891df39a88f594b3a265dbd2202f7b1fb66b27b"
+          }
+        },
+        {
           "client_id": "34420096376-jr7vlpfs3cuhfnth1hbojetosh19f5g0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -56,10 +64,10 @@
               "client_type": 3
             },
             {
-              "client_id": "34420096376-1ideknnmahfgu929ucljuakc8vq0kr7i.apps.googleusercontent.com",
+              "client_id": "34420096376-je7rpoukg4jscndfk2v9mhic8mcttdeh.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.testApp"
+                "bundle_id": "com.example.example"
               }
             }
           ]
@@ -100,10 +108,10 @@
               "client_type": 3
             },
             {
-              "client_id": "34420096376-1ideknnmahfgu929ucljuakc8vq0kr7i.apps.googleusercontent.com",
+              "client_id": "34420096376-je7rpoukg4jscndfk2v9mhic8mcttdeh.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.testApp"
+                "bundle_id": "com.example.example"
               }
             }
           ]
@@ -168,10 +176,10 @@
               "client_type": 3
             },
             {
-              "client_id": "34420096376-1ideknnmahfgu929ucljuakc8vq0kr7i.apps.googleusercontent.com",
+              "client_id": "34420096376-je7rpoukg4jscndfk2v9mhic8mcttdeh.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.testApp"
+                "bundle_id": "com.example.example"
               }
             }
           ]
